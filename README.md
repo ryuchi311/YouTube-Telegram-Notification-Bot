@@ -26,7 +26,7 @@ A Python bot that monitors YouTube channels and automatically sends notification
 1. Clone the repository:
 ```bash
 git clone https://github.com/ryuchi311/YouTube-Telegram-Notification-Bot.git
-cd PyYTTG
+cd YouTube-Telegram-Notification-Bot
 ```
 
 2. Install required packages:
@@ -45,12 +45,14 @@ ADMIN_USERS=user_id1,user_id2  # Comma-separated Telegram user IDs
 ## Project Structure
 
 ```
-PyYTTG/
-├── YT-BOT.py              # Main bot script
-├── telegram_config.py     # Configuration management
-└── pydata/
-    ├── telegram_chats.json    # Stores chat configurations
-    └── influencers.json       # Stores YouTube channel data
+YouTube-Telegram-Notification-Bot/
+├── YT-BOT.py                 # Updated main bot file
+├── telegram_config.py        # Configuration management
+├── requirements.txt          # Python dependencies
+├── .env                      # Environment variables
+└── Pydata/                  # Data directory
+    ├── telegram_chats.json   # Active chat configurations
+    └── influencers.json     # YouTube channel information
 ```
 
 ## Commands
@@ -116,3 +118,42 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) - Telegram Bot API wrapper
 - [google-api-python-client](https://github.com/googleapis/google-api-python-client) - YouTube Data API client
+
+
+## Core Dependencies:
+
+python-telegram-bot - For Telegram bot functionality
+`pip install python-telegram-bot`
+
+google-api-python-client - For YouTube API interactions
+`pip install google-api-python-client`
+
+python-dotenv - For environment variable management
+`pip install python-dotenv`
+
+aiohttp - For async HTTP requests
+`pip install aiohttp`
+
+APScheduler - For scheduling tasks
+`pip install APScheduler`
+
+Optional but Recommended:
+
+betterlogging - For improved logging capabilities
+colorama - For colored terminal output
+
+You can install all dependencies at once using:
+`pip install python-telegram-bot google-api-python-client python-dotenv aiohttp APScheduler`
+
+Key Environment Variables Required (.env file):
+YOUTUBE_API_KEY=your_youtube_api_key
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+CHECK_INTERVAL=300
+ADMIN_USERS=user_id1,user_id2
+
+To get started:
+
+Create a YouTube API key from Google Cloud Console
+Create a Telegram bot via BotFather and get the token
+Identify admin user IDs from Telegram
+Set up the .env file with these credentials
