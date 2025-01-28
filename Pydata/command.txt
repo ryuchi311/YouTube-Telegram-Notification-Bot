@@ -1,0 +1,50 @@
+C:\py\PyYoutube\
+    ├── YT-BOT.py
+    ├── telegram_config.py
+    └── pydata\
+        ├── telegram_chats.json    (created automatically)
+        └── influencers.json       (created automatically with channels)
+
+Available Commands:
+
+🔔 Notification Commands:
+/add_telegram_notify - Add current chat to notification list
+/remove_notify - Remove current chat from notification list
+/list_notify - List all chats receiving notifications
+
+📺 YouTube Channel Commands:
+/add_youtube_channel - Add a YouTube channel to monitor
+/remove_youtube_channel - Remove a YouTube channel
+/list_youtube_channels - List all monitored channels
+
+❓ Other Commands:
+/start_notify - Show welcome message
+/help_notify - Show this help message
+/how_notify - Show quick setup guide
+
+🚀 Bot Setup Guide
+
+1. Setting Up Notifications:
+• Add bot to your group/channel
+• Make bot an administrator
+• Use /add_telegram_notify in the chat
+• Verify with /list_notify
+
+2. Adding YouTube Channels:
+• Find the YouTube channel ID
+• Use: /add_youtube_channel [channel_name] [channel_id]
+• Example: /add_youtube_channel PewDiePie UC-lHJZR3Gqxm24_Vd_AJ5Yw
+• Verify with /list_youtube_channels
+
+3. Bot Operation:
+• Bot checks for new videos every 5 minutes
+• Notifications are sent automatically
+• Ensure bot remains as admin
+
+4. Management:
+• Remove channels: /remove_youtube_channel [channel_id]
+• Stop notifications: /remove_notify
+• List settings: /list_notify and /list_youtube_channels
+
+
+
