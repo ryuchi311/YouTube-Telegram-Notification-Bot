@@ -123,25 +123,25 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Core Dependencies:
 
 python-telegram-bot - For Telegram bot functionality
-
-`pip install python-telegram-bot`
-
+```
+pip install python-telegram-bot
+```
 google-api-python-client - For YouTube API interactions
-
-`pip install google-api-python-client`
-
+```
+pip install google-api-python-client
+```
 python-dotenv - For environment variable management
-
-`pip install python-dotenv`
-
+```
+pip install python-dotenv
+```
 aiohttp - For async HTTP requests
-
-`pip install aiohttp`
-
+```
+pip install aiohttp
+```
 APScheduler - For scheduling tasks
-
-`pip install APScheduler`
-
+```
+pip install APScheduler
+```
 ## Optional but Recommended:
 
 betterlogging - For improved logging capabilities
@@ -149,9 +149,9 @@ betterlogging - For improved logging capabilities
 colorama - For colored terminal output
 
 You can install all dependencies at once using:
-
-`pip install python-telegram-bot google-api-python-client python-dotenv aiohttp APScheduler`
-
+```
+pip install python-telegram-bot google-api-python-client python-dotenv aiohttp APScheduler
+```
 ## Credentials
 Key Environment Variables Required (.env file):
 ```
