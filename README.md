@@ -142,28 +142,27 @@ APScheduler - For scheduling tasks
 
 `pip install APScheduler`
 
-Optional but Recommended:
+## Optional but Recommended:
 
 betterlogging - For improved logging capabilities
+
 colorama - For colored terminal output
 
 You can install all dependencies at once using:
 
 `pip install python-telegram-bot google-api-python-client python-dotenv aiohttp APScheduler`
 
+## Credentials
 Key Environment Variables Required (.env file):
-
+```
 YOUTUBE_API_KEY=your_youtube_api_key
-
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-
 CHECK_INTERVAL=300
-
 ADMIN_USERS=user_id1,user_id2
+```
+## To get started:
 
-To get started:
-
-Create a YouTube API key from Google Cloud Console
-Create a Telegram bot via BotFather and get the token
-Identify admin user IDs from Telegram
-Set up the .env file with these credentials
+- Create a YouTube API key from Google Cloud Console
+- Create a Telegram bot via BotFather and get the token
+- Identify admin user IDs from Telegram
+- Set up the .env file with these credentials
