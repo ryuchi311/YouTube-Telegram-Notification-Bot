@@ -16,3 +16,4 @@ ENV/
 Pydata/
 *.pyc
 .pytest_cache/
+Pydata/telegram_chats.json
