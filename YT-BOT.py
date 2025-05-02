@@ -45,33 +45,31 @@ class YouTubeTelegramBot:
     
     def is_duplicate_title(self, title, upload_time):
         """
-        Check if a video with the same title was posted within the last day
-        
+        Check if a video with the same title was posted within the same day
+
         Args:
             title (str): The video title to check
             upload_time (datetime): The upload time of the current video
-            
+
         Returns:
-            bool: True if it's a duplicate within the day, False otherwise
+            bool: True if it's a duplicate within the same day, False otherwise
         """
         if title in self.title_cache:
             last_time = self.title_cache[title]
-            time_diff = upload_time - last_time
-            
-            # If the same title appears within 1 day
-            if time_diff.total_seconds() < 86400:  # 86400 seconds = 1 day
+            # Check if the title was posted on the same day
+            if last_time.date() == upload_time.date():
                 return True
-                
+
         # Update the cache with the new title and time
         self.title_cache[title] = upload_time
-        
+
         # Clean up old entries (older than 2 days)
         current_time = datetime.now(timezone.utc)
         self.title_cache = {
             t: time for t, time in self.title_cache.items()
             if (current_time - time).total_seconds() < 172800  # 2 days
         }
-        
+
         return False
 
 
