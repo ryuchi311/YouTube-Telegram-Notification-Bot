@@ -40,12 +40,12 @@ class YouTubeTelegramBot:
         self.title_cache = {}
 
     def is_admin(self, user_id: int) -> bool:
-        """Check if user is an admin"""
+        """Check if user is an admin chi """
         return user_id in self.admin_users
     
     def is_duplicate_title(self, title, upload_time):
         """
-        Check if a video with the same title was posted within the same day
+        Check if a video with the same title was posted within the same day 
 
         Args:
             title (str): The video title to check
