@@ -43,30 +43,33 @@ class YouTubeTelegramBot:
         """Check if user is an admin chi """
         return user_id in self.admin_users
     
-    def is_duplicate_title(self, title, upload_time):
+    def is_duplicate_title(self, title, upload_time, chat_id):
         """
-        Check if a video with the same title was posted within the same day 
+        Check if a video with the same title was posted within the same day in a specific chat.
 
         Args:
-            title (str): The video title to check
-            upload_time (datetime): The upload time of the current video
+            title (str): The video title to check.
+            upload_time (datetime): The upload time of the current video.
+            chat_id (int): The ID of the Telegram chat.
 
         Returns:
-            bool: True if it's a duplicate within the same day, False otherwise
+            bool: True if it's a duplicate within the same day in the chat, False otherwise.
         """
-        if title in self.title_cache:
-            last_time = self.title_cache[title]
-            # Check if the title was posted on the same day
-            if last_time.date() == upload_time.date():
+        if chat_id not in self.title_cache:
+            self.title_cache[chat_id] = {}
+
+        if title in self.title_cache[chat_id]:
+            last_time = self.title_cache[chat_id][title]
+            if upload_time.date() == last_time.date():
                 return True
 
-        # Update the cache with the new title and time
-        self.title_cache[title] = upload_time
+        # Update the cache with the new title and time for the specific chat
+        self.title_cache[chat_id][title] = upload_time
 
-        # Clean up old entries (older than 2 days)
+        # Clean up old entries (older than 2 days) for the specific chat
         current_time = datetime.now(timezone.utc)
-        self.title_cache = {
-            t: time for t, time in self.title_cache.items()
+        self.title_cache[chat_id] = {
+            t: time for t, time in self.title_cache[chat_id].items()
             if (current_time - time).total_seconds() < 172800  # 2 days
         }
 
@@ -536,9 +539,9 @@ class YouTubeTelegramBot:
         title = video['snippet']['title']
         upload_date = datetime.fromisoformat(video['snippet']['publishedAt'].replace('Z', '+00:00'))
         
-        # Check for duplicate title within the hour
-        if self.is_duplicate_title(title, upload_date):
-            print(f"Skipping duplicate title within the hour: {title}")
+        chat_id = self.config.get_chat_id_for_video(video_id)  # Assuming a method to get the chat ID for the video
+        if self.is_duplicate_title(title, upload_date, chat_id):
+            print(f"Skipping duplicate title within the same day in chat {chat_id}: {title}")
             return
             
         thumbnail_url = (
@@ -572,18 +575,38 @@ class YouTubeTelegramBot:
         """Send notifications to all configured Telegram chats"""
         chat_ids = self.config.get_telegram_chats()
         total_chats = len(chat_ids)
-        
+
+        success_chats = []
+        failed_chats = {}
+
         batch_size = 3
         for i in range(0, total_chats, batch_size):
             if self.shutdown_event.is_set():
                 return
-                
+
             batch = chat_ids[i:i + batch_size]
             for chat_id in batch:
-                await self.send_notification_to_chat(chat_id, thumbnail_data, caption)
-            
+                try:
+                    await self.send_notification_to_chat(chat_id, thumbnail_data, caption)
+                    success_chats.append(chat_id)
+                except Exception as e:
+                    failed_chats[chat_id] = str(e)
+
             if i + batch_size < total_chats:
                 await asyncio.sleep(3)
+
+        # Simplified and clean report for monitoring
+        print("\n================ Notification Report ================")
+        print(f"📬 Total Chats: {total_chats} | ✅ Success: {len(success_chats)} | ❌ Failed: {len(failed_chats)}")
+
+        if failed_chats:
+            print("⚠️ Failed Chats:")
+            for chat_id, error in failed_chats.items():
+                print(f"  - {chat_id}: {error}")
+
+        print("====================================================\n")
+
+        print("Waiting for next check...")
 
     async def send_notification_to_chat(self, chat_id, thumbnail_data, caption):
         """Send notification to a single chat"""
@@ -631,6 +654,8 @@ class YouTubeTelegramBot:
     async def monitor_channels(self):
         """Main monitoring loop"""
         self.running = True
+        success_chats = []  # Initialize success_chats to track successful notifications
+        failed_chats = {}  # Initialize failed_chats to track failed notifications
         while not self.shutdown_event.is_set():
             try:
                 channels = self.config.get_youtube_channels()
@@ -655,7 +680,27 @@ class YouTubeTelegramBot:
                 if self.shutdown_event.is_set():
                     break
 
-                print("\nWaiting for next check...")
+                # Consolidated report before waiting for the next check
+                print("\n==================== Notification Report ====================")
+                total_chats = len(self.config.get_telegram_chats())
+                print(f"📬 Total Chats: {total_chats}")
+                print(f"✅ Success: {len(success_chats)}")
+                print(f"❌ Failed: {len(failed_chats)}")
+                print("------------------------------------------------------------")
+
+                if success_chats:
+                    print("🎉 Successfully sent notifications to the following chats:")
+                    for chat_id in success_chats:
+                        print(f"  - Chat ID: {chat_id}")
+
+                if failed_chats:
+                    print("⚠️ Failed to send notifications to the following chats:")
+                    for chat_id, error in failed_chats.items():
+                        print(f"  - Chat ID: {chat_id} | Error: {error}")
+
+                print("============================================================\n")
+
+                print("Waiting for next check...")
                 try:
                     await asyncio.wait_for(
                         self.shutdown_event.wait(), 

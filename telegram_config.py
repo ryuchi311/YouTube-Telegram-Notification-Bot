@@ -189,3 +189,12 @@ class TelegramConfig:
                 print(f"  Type: {chat['type']}")
                 print(f"  Added: {chat['added_at']}")
         print("="*30 + "\n")
+
+    def get_chat_id_for_video(self, video_id: str) -> int:
+        """Get the chat ID associated with a specific video ID."""
+        # Example logic: Return the first chat ID or a default value
+        if self.chats:
+            return self.chats[0]['id']  # Return the first chat ID as a fallback
+        
+        # If no chats are configured, raise an exception or return a default value
+        raise ValueError("No chats are configured to receive notifications.")
