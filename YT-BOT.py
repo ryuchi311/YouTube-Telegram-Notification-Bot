@@ -606,7 +606,7 @@ class YouTubeTelegramBot:
 
         print("====================================================\n")
 
-        print("Waiting for next check...")
+        
 
     async def send_notification_to_chat(self, chat_id, thumbnail_data, caption):
         """Send notification to a single chat"""
@@ -656,6 +656,7 @@ class YouTubeTelegramBot:
         self.running = True
         success_chats = []  # Initialize success_chats to track successful notifications
         failed_chats = {}  # Initialize failed_chats to track failed notifications
+        total_chats = len(self.config.get_telegram_chats())  # Calculate total chats
         while not self.shutdown_event.is_set():
             try:
                 channels = self.config.get_youtube_channels()
@@ -680,27 +681,27 @@ class YouTubeTelegramBot:
                 if self.shutdown_event.is_set():
                     break
 
-                # Consolidated report before waiting for the next check
+                # Enhanced report to list groups for success and fail, along with totals
                 print("\n==================== Notification Report ====================")
-                total_chats = len(self.config.get_telegram_chats())
                 print(f"📬 Total Chats: {total_chats}")
                 print(f"✅ Success: {len(success_chats)}")
                 print(f"❌ Failed: {len(failed_chats)}")
                 print("------------------------------------------------------------")
 
                 if success_chats:
-                    print("🎉 Successfully sent notifications to the following chats:")
+                    print("🎉 Success List:")
                     for chat_id in success_chats:
                         print(f"  - Chat ID: {chat_id}")
 
                 if failed_chats:
-                    print("⚠️ Failed to send notifications to the following chats:")
+                    print("⚠️ Failed List:")
                     for chat_id, error in failed_chats.items():
                         print(f"  - Chat ID: {chat_id} | Error: {error}")
 
                 print("============================================================\n")
 
-                print("Waiting for next check...")
+                print("⏳ Waiting for the next check...\n")
+                
                 try:
                     await asyncio.wait_for(
                         self.shutdown_event.wait(), 
