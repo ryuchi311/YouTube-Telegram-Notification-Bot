@@ -401,20 +401,33 @@ class YouTubeTelegramBot:
         # Get bot status information
         channels = self.config.get_youtube_channels()
         chats = self.config.get_chats()
+        link_preview_opts = self.config.get_link_preview_options()
         
         status_icon = "⏸️" if self.paused else "▶️"
         status_text = "PAUSED" if self.paused else "RUNNING"
         thumbnail_icon = "🖼️" if self.thumbnails_enabled else "📝"
         thumbnail_text = "ENABLED" if self.thumbnails_enabled else "DISABLED"
         
+        # Link preview status
+        link_preview_disabled = link_preview_opts.get('is_disabled', False)
+        link_preview_status = "DISABLED" if link_preview_disabled else "ENABLED"
+        
         status_message = (
             f"🤖 <b>Bot Status Report</b>\n\n"
             f"{status_icon} <b>Status:</b> {status_text}\n"
             f"{thumbnail_icon} <b>Thumbnails:</b> {thumbnail_text}\n"
-            f"📺 <b>YouTube Channels:</b> {len(channels)} monitored\n"
+            f"� <b>Link Preview:</b> {link_preview_status}\n"
+            f"�📺 <b>YouTube Channels:</b> {len(channels)} monitored\n"
             f"💬 <b>Telegram Chats:</b> {len(chats)} active\n"
             f"⏱️ <b>Check Interval:</b> {self.check_interval} seconds\n"
             f"🤖 <b>Bot Running:</b> {'Yes' if self.running else 'No'}\n\n"
+            f"<b>🔧 Notification Settings (from configuration.json):</b>\n"
+            f"  📷 Thumbnails: <code>{self.thumbnails_enabled}</code>\n"
+            f"  🔗 Link Preview: <code>{not link_preview_disabled}</code>\n\n"
+            f"<b>🔗 Link Preview Settings:</b>\n"
+            f"  📷 Prefer Small Photo: <code>{link_preview_opts.get('prefer_small_media', True)}</code>\n"
+            f"  🖼️ Prefer Large Photo: <code>{link_preview_opts.get('prefer_large_media', False)}</code>\n"
+            f"  ⬆️ Show Text Above: <code>{link_preview_opts.get('show_above_text', True)}</code>\n\n"
         )
         
         if self.paused:

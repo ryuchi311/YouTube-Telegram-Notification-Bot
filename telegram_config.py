@@ -11,10 +11,12 @@ class TelegramConfig:
         self.chats_file = self.data_folder / 'telegram_chats.json'
         self.channels_file = self.data_folder / 'influencers.json'
         self.settings_file = self.data_folder / 'settings.json'
+        self.config_file = self.data_folder / 'configuration.json'
         self.ensure_data_folder()
         self.load_chats()
         self.load_channels()
         self.load_settings()
+        self.load_configuration()
 
     def ensure_data_folder(self):
         """Create pydata folder and initialize files if they don't exist"""
@@ -79,6 +81,42 @@ class TelegramConfig:
                 "show_above_text": True
             }
         }
+
+    def load_configuration(self):
+        """Load configuration from configuration.json and merge with settings"""
+        try:
+            with open(self.config_file, 'r') as f:
+                config_data = json.load(f)
+            print(f"Loaded configuration from {self.config_file}")
+            
+            # Merge configuration into settings
+            if 'notification_settings' in config_data:
+                notif_settings = config_data['notification_settings']
+                
+                # Update thumbnails setting
+                if 'thumbnails' in notif_settings:
+                    self.settings['thumbnails_enabled'] = notif_settings['thumbnails']
+                
+                # Update link preview settings
+                if 'link_preview' in notif_settings:
+                    self.settings['link_preview_options']['is_disabled'] = not notif_settings['link_preview']
+                
+                if 'link_preview_settings' in notif_settings:
+                    lp_settings = notif_settings['link_preview_settings']
+                    if 'preferred_small_photo' in lp_settings:
+                        self.settings['link_preview_options']['prefer_small_media'] = lp_settings['preferred_small_photo']
+                    if 'preferred_large_photo' in lp_settings:
+                        self.settings['link_preview_options']['prefer_large_media'] = lp_settings['preferred_large_photo']
+                    if 'show_text_above' in lp_settings:
+                        self.settings['link_preview_options']['show_above_text'] = lp_settings['show_text_above']
+            
+            # Save merged settings
+            self.save_settings()
+            print("Configuration merged successfully")
+            
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"No existing configuration file found or error loading: {str(e)}")
+            print("Using settings from settings.json")
 
     def load_settings(self):
         """Load settings from settings.json"""
