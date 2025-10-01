@@ -1,0 +1,41 @@
+services:
+  youtube-telegram-bot:
+    build: .
+    container_name: yt-telegram-bot
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      # Mount data directory to persist bot data
+      - ./Pydata:/app/Pydata
+      # Optional: Mount logs directory
+      - ./logs:/app/logs
+    networks:
+      - bot-network
+    # Optional: CPU and memory limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('https://api.telegram.org', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  bot-network:
+    driver: bridge
+
+# Optional: Create volumes for persistent data
+volumes:
+  bot-data:
+    driver: local
