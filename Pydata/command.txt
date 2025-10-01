@@ -1,99 +1,218 @@
-YouTube-Telegram-Notification-Bot/
-├── YT-BOT.py                 # Updated main bot file
-├── telegram_config.py        # Configuration management
-├── requirements.txt          # Python dependencies
-├── .env                      # Environment variables
-└── Pydata/                  # Data directory
-    ├── telegram_chats.json   # Active chat configurations
-    └── influencers.json     # YouTube channel information
+🤖 YOUTUBE TELEGRAM NOTIFICATION BOT - COMMAND REFERENCE 🤖
+═══════════════════════════════════════════════════════════════
 
-YouTube Telegram Notification Bot
-A Python bot that monitors YouTube channels and automatically sends notifications to Telegram groups/channels when new videos are uploaded.
+📋 QUICK REFERENCE GUIDE FOR BEGINNERS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
-Features
-🔄 Real-time monitoring of multiple YouTube channels
-📢 Instant notifications in Telegram when new videos are uploaded
-🎯 Clean and professional notification format with thumbnails
-👥 Support for multiple Telegram groups/channels
-🔐 Admin-only access control
-⚙️ Easy configuration via environment variables
-💾 Persistent storage of channels and chat configurations
-🚀 Automatic retry mechanism for failed notifications
-🛡️ Error handling and graceful shutdown
-Prerequisites
-Python 3.8+
-YouTube Data API v3 key
-Telegram Bot Token
-Required Python packages (see requirements.txt)
-Installation
-Clone the repository:
-git clone https://github.com/ryuchi311/YouTube-Telegram-Notification-Bot.git
-cd PyYTTG
-Install required packages:
-pip install -r requirements.txt
-Create and configure .env file:
-YOUTUBE_API_KEY=your_youtube_api_key
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-CHECK_INTERVAL=300  # Check interval in seconds (default: 300)
-ADMIN_USERS=user_id1,user_id2  # Comma-separated Telegram user IDs
+🚀 GETTING STARTED COMMANDS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
-Project Structure
-YouTube-Telegram-Notification-Bot/
-├── YT-BOT.py                 # Updated main bot file
-├── telegram_config.py        # Configuration management
-├── requirements.txt          # Python dependencies
-├── .env                      # Environment variables
-└── Pydata/                  # Data directory
-    ├── telegram_chats.json   # Active chat configurations
-    └── influencers.json     # YouTube channel information
-Commands
-Notification Management
-/start_notify - Start the bot
-/help_notify - Show help message
-/how_notify - Show setup guide
-/add_telegram_notify - Add current chat to notification list
-/remove_notify - Remove current chat from notification list
-/list_notify - List all chats receiving notifications
-YouTube Channel Management
-/add_youtube_channel - Add a YouTube channel to monitor
-/remove_youtube_channel - Remove a YouTube channel
-/list_youtube_channels - List all monitored channels
-Setup Guide
-Channel Configuration:
+📌 /start_notify
+   ├─ 🎯 Purpose: Welcome message and bot introduction
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /start_notify
+   └─ 💡 Tip: Use this first to test if bot works
 
-Get YouTube channel IDs for channels you want to monitor
-Use /add_youtube_channel [channel_name] [channel_id]
-Example: /add_youtube_channel PewDiePie UC-lHJZR3Gqxm24_Vd_AJ5Yw
-Telegram Setup:
+📌 /help_notify
+   ├─ 🎯 Purpose: Show all available commands
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /help_notify
+   └─ 💡 Tip: Your go-to reference for all commands
 
-Add bot to target groups/channels
-Make bot an administrator
-Use /add_telegram_notify in each chat
-Verify with /list_notify
-Features in Detail
-YouTube Monitoring
-Regular checking of new uploads (default: every 5 minutes)
-Smart caching of channel data to minimize API usage
-Efficient batch processing of video notifications
-Telegram Integration
-Rich message formatting with HTML support
-Automatic thumbnail extraction and sharing
-Batch notification processing to avoid rate limits
-Automatic cleanup of invalid chats
-Error Handling
-Connection retry mechanism
-Graceful shutdown handling
-Invalid chat cleanup
-Comprehensive error logging
-Contributing
-Fork the repository
-Create your feature branch (git checkout -b feature/amazing-feature)
-Commit your changes (git commit -m 'Add amazing feature')
-Push to the branch (git push origin feature/amazing-feature)
-Open a Pull Request
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
+📌 /how_notify
+   ├─ 🎯 Purpose: Step-by-step setup tutorial
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /how_notify
+   └─ 💡 Tip: Perfect for beginners - shows setup guide
 
-Acknowledgments
-python-telegram-bot - Telegram Bot API wrapper
-google-api-python-client - YouTube Data API client
+═══════════════════════════════════════════════════════════════
+
+📢 NOTIFICATION MANAGEMENT COMMANDS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+� /add_telegram_notify
+   ├─ 🎯 Purpose: Add current chat to notification list
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Use in the group/channel you want notifications
+   ├─ ⚠️ Important: Bot must be admin in the group
+   └─ � Example: Go to your group → type /add_telegram_notify
+
+� /remove_notify
+   ├─ 🎯 Purpose: Stop notifications in current chat
+   ├─ � Who can use: Admins only
+   ├─ 📝 Usage: Use in the group you want to stop notifications
+   └─ � Tip: Instantly stops all video notifications
+
+� /list_notify
+   ├─ 🎯 Purpose: Show all chats receiving notifications
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /list_notify
+   └─ 💡 Shows: Chat names, types, IDs, and when they were added
+
+═══════════════════════════════════════════════════════════════
+
+📺 YOUTUBE CHANNEL MANAGEMENT COMMANDS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+📌 /add_youtube_channel
+   ├─ 🎯 Purpose: Add YouTube channel (without Telegram group)
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: /add_youtube_channel [channel_name] [channel_id]
+   ├─ 🌟 Example: /add_youtube_channel PewDiePie UC-lHJZR3Gqxm24_Vd_AJ5Yw
+   └─ 💡 Tip: Channel will be verified before adding
+
+📌 /add_youtube_channel_with_group
+   ├─ 🎯 Purpose: Add YouTube channel WITH Telegram group link
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: /add_youtube_channel_with_group [name] [id] [tg_link]
+   ├─ 🌟 Example: /add_youtube_channel_with_group MikeTamago UCR3aArAyYGXwJegyRGZ7WTg https://t.me/tamagowarriors
+   ├─ ✨ Special: Creates clickable "Join_MyTG" links in notifications
+   └─ 💡 Tip: Telegram link must start with https://t.me/ or t.me/
+
+📌 /remove_youtube_channel
+   ├─ 🎯 Purpose: Remove YouTube channel from monitoring
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: /remove_youtube_channel [channel_id]
+   ├─ 🌟 Example: /remove_youtube_channel UC-lHJZR3Gqxm24_Vd_AJ5Yw
+   └─ 💡 Tip: Use /list_youtube_channels to see channel IDs
+
+📌 /list_youtube_channels
+   ├─ 🎯 Purpose: Show all monitored YouTube channels
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /list_youtube_channels
+   └─ 💡 Shows: Channel names, IDs, and Telegram group links
+
+═══════════════════════════════════════════════════════════════
+
+🔍 HOW TO FIND YOUTUBE CHANNEL ID
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+Method 1: From Channel URL
+├─ 🌐 Go to: youtube.com/channel/UC-lHJZR3Gqxm24_Vd_AJ5Yw
+├─ 📋 Copy: UC-lHJZR3Gqxm24_Vd_AJ5Yw (the part after /channel/)
+└─ ✅ That's your channel ID!
+
+Method 2: From Custom URL
+├─ 🌐 Go to: youtube.com/@channelname
+├─ 👀 Look for "View channel ID" option
+├─ 🖱️ Right-click → View page source
+└─ 🔍 Search for: "UC" (channel IDs start with UC)
+
+Method 3: Online Tools
+├─ 🔧 Use: commentpicker.com/youtube-channel-id.php
+├─ 📝 Paste: Channel URL
+└─ ✨ Get: Channel ID instantly
+
+═══════════════════════════════════════════════════════════════
+
+🎯 STEP-BY-STEP SETUP FOR BEGINNERS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+STEP 1: 🤖 Test Your Bot
+├─ 💬 Send: /start_notify (to check if bot responds)
+├─ ❓ Send: /help_notify (to see all commands)
+└─ ✅ If bot responds, you're ready to proceed!
+
+STEP 2: 📺 Add Your First YouTube Channel
+├─ 🔍 Find the YouTube channel ID (see guide above)
+├─ 💬 Send: /add_youtube_channel_with_group ChannelName ChannelID https://t.me/yourgroup
+├─ 🌟 Example: /add_youtube_channel_with_group MrBeast UCX6OQ3DkcsbYNE6H8uQQuVA https://t.me/mrbeastfans
+└─ ✅ Bot will verify the channel exists
+
+STEP 3: 📱 Set Up Telegram Notifications
+├─ ➕ Add bot to your Telegram group/channel
+├─ 👑 Make bot an administrator (important!)
+├─ 💬 In the group, send: /add_telegram_notify
+└─ ✅ Bot will confirm the group is added
+
+STEP 4: 🔍 Verify Your Setup
+├─ 💬 Send: /list_youtube_channels (see your channels)
+├─ 💬 Send: /list_notify (see your notification groups)
+└─ ✅ Everything listed? You're all set!
+
+═══════════════════════════════════════════════════════════════
+
+🎨 NOTIFICATION PREVIEW
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+When a new video is uploaded, you'll receive:
+
+🔥 NEW UPLOAD WATCH NOW 🔥
+═══════════════════════════
+🎬 Amazing Video Title Here
+📺 Channel Name
+📅 2024-10-01 15:30 UTC
+Join_MyTG #ChannelName
+
+Features:
+├─ 🖼️ Video thumbnail image
+├─ 🔗 Clickable video title (opens YouTube)
+├─ 🔗 Clickable channel name (opens channel)
+├─ 🔗 Clickable "Join_MyTG" (opens Telegram group)
+└─ 🏷️ Hashtag with channel name
+
+═══════════════════════════════════════════════════════════════
+
+⚠️ COMMON ISSUES & SOLUTIONS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+🚫 "Sorry, only admin users can use this bot"
+└─ 💡 Solution: Your Telegram user ID is not in ADMIN_USERS
+
+❌ "Could not find YouTube channel with ID"
+└─ 💡 Solution: Double-check the channel ID is correct
+
+🔐 "Chat not found" or "Bot was blocked"
+└─ 💡 Solution: Bot will automatically remove invalid chats
+
+⚡ "Network timeout" or connection errors
+└─ 💡 Solution: Check internet connection, bot will retry automatically
+
+🚯 Bot not responding at all
+├─ 🔍 Check: .env file has correct TELEGRAM_BOT_TOKEN
+├─ 🔍 Check: Bot is running (python YT-BOT.py)
+└─ 🔍 Check: No errors in terminal output
+
+═══════════════════════════════════════════════════════════════
+
+🏆 PRO TIPS FOR ADVANCED USERS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+💡 Tip 1: Organize Your Channels
+├─ 📁 Group similar channels together
+├─ 🏷️ Use descriptive names when adding channels
+└─ 📝 Keep a list of your channel IDs for backup
+
+💡 Tip 2: Optimize Check Intervals
+├─ ⚡ CHECK_INTERVAL=300 (5 min) - Good for active channels
+├─ 🐌 CHECK_INTERVAL=600 (10 min) - Good for less active channels
+└─ ⚠️ Don't go below 60 seconds (API rate limits)
+
+💡 Tip 3: Multiple Notification Groups
+├─ 🎯 Different groups for different types of content
+├─ 👥 Gaming channels → Gaming group
+├─ 🎵 Music channels → Music group
+└─ 📚 Educational channels → Learning group
+
+💡 Tip 4: Backup Your Configuration
+├─ 💾 Save your .env file
+├─ 💾 Backup Pydata/influencers.json
+└─ 💾 Backup Pydata/telegram_chats.json
+
+═══════════════════════════════════════════════════════════════
+
+📞 SUPPORT & COMMUNITY
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+🐛 Found a bug? → Open an issue on GitHub
+💡 Have an idea? → Submit a feature request
+❓ Need help? → Check this command reference first
+📚 Documentation → README.md has detailed guides
+🌟 Love the bot? → Star the GitHub repository!
+
+═══════════════════════════════════════════════════════════════
+
+Made with ❤️ for the YouTube & Telegram community
+Last updated: October 2024 | Version: 2.0
+
+═══════════════════════════════════════════════════════════════

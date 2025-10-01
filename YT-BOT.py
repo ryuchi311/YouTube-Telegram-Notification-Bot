@@ -120,6 +120,7 @@ class YouTubeTelegramBot:
             "/list_notify - List all chats receiving notifications\n\n"
             "📺 <b>YouTube Channel Commands:</b>\n"
             "/add_youtube_channel - Add a YouTube channel to monitor\n"
+            "/add_youtube_channel_with_group - Add a YouTube channel with Telegram group\n"
             "/remove_youtube_channel - Remove a YouTube channel\n"
             "/list_youtube_channels - List all monitored channels\n\n"
             "❓ <b>Other Commands:</b>\n"
@@ -156,6 +157,8 @@ class YouTubeTelegramBot:
             "• Find the YouTube channel ID\n"
             "• Use: /add_youtube_channel [channel_name] [channel_id]\n"
             "• Example: /add_youtube_channel PewDiePie UC-lHJZR3Gqxm24_Vd_AJ5Yw\n"
+            "• With Telegram group: /add_youtube_channel_with_group [name] [id] [tg_link]\n"
+            "• Example: /add_youtube_channel_with_group MikeTamago UCR3aArAyYGXwJegyRGZ7WTg https://t.me/tamagowarriors\n"
             "• Verify with /list_youtube_channels\n\n"
             "<b>3. Bot Operation:</b>\n"
             "• Bot checks for new videos every 5 minutes\n"
@@ -336,7 +339,8 @@ class YouTubeTelegramBot:
         if not context.args or len(context.args) < 2:
             await update.message.reply_text(
                 "❌ Usage: /add_youtube_channel <channel_name> <channel_id>\n\n"
-                "Example: /add_youtube_channel PewDiePie UC-lHJZR3Gqxm24_Vd_AJ5Yw",
+                "Example: /add_youtube_channel PewDiePie UC-lHJZR3Gqxm24_Vd_AJ5Yw\n\n"
+                "For channels with Telegram groups, use: /add_youtube_channel_with_group",
                 parse_mode=ParseMode.HTML
             )
             return
@@ -367,6 +371,79 @@ class YouTubeTelegramBot:
                     f"✅ Successfully added YouTube channel!\n\n"
                     f"Channel: <b>{actual_name}</b>\n"
                     f"ID: <code>{channel_id}</code>",
+                    parse_mode=ParseMode.HTML
+                )
+            else:
+                await update.message.reply_text(
+                    f"ℹ️ This channel is already in the monitoring list.\n\n"
+                    f"Channel: <b>{actual_name}</b>\n"
+                    f"ID: <code>{channel_id}</code>",
+                    parse_mode=ParseMode.HTML
+                )
+        
+        except Exception as e:
+            await update.message.reply_text(
+                f"❌ Error adding channel: {str(e)}",
+                parse_mode=ParseMode.HTML
+            )
+
+    async def cmd_add_youtube_channel_with_group(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /add_youtube_channel_with_group command"""
+        user_id = update.effective_user.id
+        
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        # Check command arguments
+        if not context.args or len(context.args) < 3:
+            await update.message.reply_text(
+                "❌ Usage: /add_youtube_channel_with_group <channel_name> <channel_id> <telegram_group_link>\n\n"
+                "Example: /add_youtube_channel_with_group MikeTamago UCR3aArAyYGXwJegyRGZ7WTg https://t.me/tamagowarriors",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        channel_name = context.args[0]
+        channel_id = context.args[1]
+        tg_group = context.args[2]
+        
+        # Validate Telegram group link
+        if not (tg_group.startswith('https://t.me/') or tg_group.startswith('t.me/')):
+            await update.message.reply_text(
+                "❌ Invalid Telegram group link. Must start with 'https://t.me/' or 't.me/'\n\n"
+                "Example: https://t.me/tamagowarriors",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        try:
+            # Verify channel exists on YouTube before adding
+            response = self.youtube.channels().list(
+                part="snippet",
+                id=channel_id
+            ).execute()
+            
+            if not response.get('items'):
+                await update.message.reply_text(
+                    f"❌ Could not find YouTube channel with ID: {channel_id}\n"
+                    f"Please verify the channel ID is correct.",
+                    parse_mode=ParseMode.HTML
+                )
+                return
+            
+            # Get actual channel name from YouTube if available
+            actual_name = response['items'][0]['snippet']['title']
+            
+            if self.config.add_youtube_channel(actual_name, channel_id, tg_group):
+                await update.message.reply_text(
+                    f"✅ Successfully added YouTube channel with Telegram group!\n\n"
+                    f"Channel: <b>{actual_name}</b>\n"
+                    f"ID: <code>{channel_id}</code>\n"
+                    f"Telegram Group: <a href='{tg_group}'>{tg_group}</a>",
                     parse_mode=ParseMode.HTML
                 )
             else:
@@ -442,10 +519,16 @@ class YouTubeTelegramBot:
         
         channel_list = []
         for channel in channels:
-            channel_list.append(
+            channel_info = (
                 f"• <b>{channel['name']}</b>\n"
                 f"  ID: <code>{channel['id']}</code>"
             )
+            
+            # Add Telegram group if available
+            if 'tg_group' in channel and channel['tg_group']:
+                channel_info += f"\n  TG Group: <a href='{channel['tg_group']}'>{channel['tg_group']}</a>"
+            
+            channel_list.append(channel_info)
         
         message = "📝 <b>Monitored YouTube Channels:</b>\n\n" + "\n\n".join(channel_list)
         
@@ -537,6 +620,7 @@ class YouTubeTelegramBot:
 
         video_id = video['id']
         title = video['snippet']['title']
+        channel_id = video['snippet']['channelId']
         upload_date = datetime.fromisoformat(video['snippet']['publishedAt'].replace('Z', '+00:00'))
         
         chat_id = self.config.get_chat_id_for_video(video_id)  # Assuming a method to get the chat ID for the video
@@ -560,13 +644,27 @@ class YouTubeTelegramBot:
         
         formatted_date = upload_date.strftime('%Y-%m-%d %H:%M UTC')
 
+        # Get the channel's Telegram group link
+        channel_tg_group = None
+        channels = self.config.get_youtube_channels()
+        for channel in channels:
+            if channel['id'] == channel_id:
+                channel_tg_group = channel.get('tg_group')
+                break
+        
+        # Create Join_MyTG hyperlink or plain text
+        if channel_tg_group:
+            join_link = f"<a href='{channel_tg_group}'>Join_MyTG</a>"
+        else:
+            join_link = "Join_MyTG"
+
         caption = (
             f"🔥<b>NEW UPLOAD WATCH NOW</b>🔥\n"
             f"═══════════════\n"
             f"🎬 <b><a href='https://youtube.com/watch?v={video_id}'>{title}</a></b>\n"
             f"📺 <b><a href='https://youtube.com/channel/{video['snippet']['channelId']}?sub_confirmation=1'>{video['snippet']['channelTitle']}</a></b>\n"
             f"📅 {formatted_date}\n"
-            f"#NewVideo #{video['snippet']['channelTitle'].replace(' ', '')}"
+            f"{join_link} #{video['snippet']['channelTitle'].replace(' ', '')}"
         )
 
         await self.send_notifications(thumbnail_data, caption)
@@ -731,6 +829,7 @@ class YouTubeTelegramBot:
         
         # YouTube channel management commands
         application.add_handler(CommandHandler('add_youtube_channel', self.cmd_add_youtube_channel))
+        application.add_handler(CommandHandler('add_youtube_channel_with_group', self.cmd_add_youtube_channel_with_group))
         application.add_handler(CommandHandler('remove_youtube_channel', self.cmd_remove_youtube_channel))
         application.add_handler(CommandHandler('list_youtube_channels', self.cmd_list_youtube_channels))
         

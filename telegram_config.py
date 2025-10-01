@@ -106,21 +106,29 @@ class TelegramConfig:
         return False
 
     #-------------------------------------------------------------------------#
-    def add_youtube_channel(self, channel_name: str, channel_id: str) -> bool:
+    def add_youtube_channel(self, channel_name: str, channel_id: str, tg_group: str = None) -> bool:
         """Add a new YouTube channel to the configuration"""
         # Clean the input
         channel_name = channel_name.strip()
         channel_id = channel_id.strip()
+        if tg_group:
+            tg_group = tg_group.strip()
         
         # Check if channel already exists
         if any(c['id'] == channel_id for c in self.channels):
             return False
             
         # Add new channel
-        self.channels.append({
+        channel_data = {
             'name': channel_name,
             'id': channel_id
-        })
+        }
+        
+        # Add tg_group if provided
+        if tg_group:
+            channel_data['tg_group'] = tg_group
+            
+        self.channels.append(channel_data)
         
         # Save to file
         with open(self.channels_file, 'w') as f:

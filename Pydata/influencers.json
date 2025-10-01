@@ -2,43 +2,63 @@
     "channels": [
         {
             "name": "MikeTamago-",
-            "id": "UCR3aArAyYGXwJegyRGZ7WTg"
+            "id": "UCR3aArAyYGXwJegyRGZ7WTg",
+            "tg_group": "https://t.me/tamagowarriors"
         },
         {
             "name": "ALROCK",
-            "id": "UC-sXVjY3Lw1IGxsme-_4ixA"
+            "id": "UC-sXVjY3Lw1IGxsme-_4ixA",
+            "tg_group": "https://t.me/+ejJlVLxhX4dhOGY1"
         },
         {
             "name": "Dongayantv",
-            "id": "UCG0y34BqW7ERseyMEsIJaOA"
+            "id": "UCG0y34BqW7ERseyMEsIJaOA",
+            "tg_group": "https://t.me/+5sgkoKGrM2w0MTY1"
         },
         {
             "name": "ultm8x",
-            "id": "UC7jm4PVZdNYKsX-3ORdz7IQ"
+            "id": "UC7jm4PVZdNYKsX-3ORdz7IQ",
+            "tg_group": "https://t.me/ultm8xdigizen"
         },
         {
             "name": "crypdropph",
-            "id": "UCPDWOJTGkVAssPGBFfSHoiA"
+            "id": "UCPDWOJTGkVAssPGBFfSHoiA",
+            "tg_group": "https://t.me/CrypDrop_Ph"
         },
         {
             "name": "kitakingph",
-            "id": "UCU5n-pAZvHo2VHdkuUD3eLQ"
+            "id": "UCU5n-pAZvHo2VHdkuUD3eLQ",
+            "tg_group": "https://t.me/+hQcgpBSYXRJjNzFl"
         },
         {
             "name": "aratsboigaming",
-            "id": "UCokp3z-k5GuuySZm2VgWFGQ"
+            "id": "UCokp3z-k5GuuySZm2VgWFGQ",
+            "tg_group": "https://t.me/aratsboigaming"
         },
         {
             "name": "kimporsha11",
-            "id": "UCYSEOxNdA5gAS8VYIrkh5xw"
+            "id": "UCYSEOxNdA5gAS8VYIrkh5xw",
+            "tg_group": "https://t.me/KimPorsha_Kimmunity"
         },
         {
             "name": "NinjaFarmer",
-            "id": "UC7evDlV24aVuEBfV4m0zw3g"
+            "id": "UC7evDlV24aVuEBfV4m0zw3g",
+            "tg_group": "https://t.me/tamagowarriors"
         },
         {
             "name": "CGNweb3review",
-            "id": "UC1uD0TJEk_K7kF9BnlK3H7g"
+            "id": "UC1uD0TJEk_K7kF9BnlK3H7g",
+            "tg_group": "https://t.me/CGNweb3"
+        },
+        {
+            "name": "Aratsboi",
+            "id": "UCN5LBn3OCOaFzdB1n8tY8Vw",
+            "tg_group": "https://t.me/aratsboigaming"
+        },
+        {
+            "name": "Aratsboi Roblox",
+            "id": "UCMkmM864V3salLOR-ZtCK-Q",
+            "tg_group": "https://t.me/aratsboigaming"
         }
     ]
 }
