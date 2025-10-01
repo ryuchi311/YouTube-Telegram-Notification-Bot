@@ -7,7 +7,7 @@ import platform
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
-from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, LinkPreviewOptions
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
 from io import BytesIO
@@ -35,7 +35,7 @@ class YouTubeTelegramBot:
         self.check_interval = int(os.getenv('CHECK_INTERVAL', '300'))
         self.running = False
         self.paused = False  # Add pause state
-        self.thumbnails_enabled = True  # Add thumbnail control
+        self.thumbnails_enabled = self.config.get_thumbnails_enabled()  # Load from settings
         self.last_check = {}
         self.shutdown_event = asyncio.Event()
         self.channel_cache = {}
@@ -126,7 +126,8 @@ class YouTubeTelegramBot:
             "/status_notify - Show current bot status\n\n"
             "�️ <b>Thumbnail Commands:</b>\n"
             "/enable_thumbnails - Enable thumbnail images in notifications\n"
-            "/disable_thumbnails - Disable thumbnail images (text only)\n\n"
+            "/disable_thumbnails - Disable thumbnail images (text only)\n"
+            "/set_link_preview - Configure link preview options (when thumbnails disabled)\n\n"
             "�📺 <b>YouTube Channel Commands:</b>\n"
             "/add_youtube_channel - Add a YouTube channel to monitor\n"
             "/add_youtube_channel_with_group - Add a YouTube channel with Telegram group\n"
@@ -452,6 +453,7 @@ class YouTubeTelegramBot:
             return
 
         self.thumbnails_enabled = True
+        self.config.set_thumbnails_enabled(True)  # Save to settings
         await update.message.reply_text(
             "🖼️ <b>Thumbnails have been enabled!</b>\n\n"
             "📸 Notifications will now include video thumbnail images.\n"
@@ -481,6 +483,7 @@ class YouTubeTelegramBot:
             return
 
         self.thumbnails_enabled = False
+        self.config.set_thumbnails_enabled(False)  # Save to settings
         await update.message.reply_text(
             "📝 <b>Thumbnails have been disabled!</b>\n\n"
             "📄 Notifications will now be text-only messages.\n"
@@ -489,6 +492,116 @@ class YouTubeTelegramBot:
             parse_mode=ParseMode.HTML
         )
         print(f"📝 Thumbnails disabled by admin user {user_id}")
+
+    async def cmd_set_link_preview(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /set_link_preview command to configure link preview options"""
+        user_id = update.effective_user.id
+        
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        # Show current settings if no arguments
+        if not context.args:
+            current_opts = self.config.get_link_preview_options()
+            await update.message.reply_text(
+                "⚙️ <b>Current Link Preview Settings</b>\n\n"
+                f"🔘 is_disabled: <code>{current_opts.get('is_disabled', False)}</code>\n"
+                f"📷 prefer_small_media: <code>{current_opts.get('prefer_small_media', True)}</code>\n"
+                f"🖼️ prefer_large_media: <code>{current_opts.get('prefer_large_media', False)}</code>\n"
+                f"⬆️ show_above_text: <code>{current_opts.get('show_above_text', True)}</code>\n\n"
+                "📝 <b>Usage:</b>\n"
+                "/set_link_preview &lt;option&gt; &lt;true|false&gt;\n\n"
+                "<b>Options:</b>\n"
+                "• disabled - Disable/enable link preview\n"
+                "• small - Shrink media in preview\n"
+                "• large - Enlarge media in preview\n"
+                "• above - Show preview above text\n\n"
+                "<b>Examples:</b>\n"
+                "<code>/set_link_preview disabled false</code>\n"
+                "<code>/set_link_preview small true</code>\n"
+                "<code>/set_link_preview large false</code>\n"
+                "<code>/set_link_preview above true</code>",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        # Parse arguments
+        if len(context.args) < 2:
+            await update.message.reply_text(
+                "❌ Usage: /set_link_preview <option> <true|false>\n\n"
+                "Example: /set_link_preview small true",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        option = context.args[0].lower()
+        value_str = context.args[1].lower()
+        
+        if value_str not in ['true', 'false']:
+            await update.message.reply_text(
+                "❌ Value must be 'true' or 'false'",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        value = value_str == 'true'
+        
+        # Map short names to full parameter names
+        option_map = {
+            'disabled': 'is_disabled',
+            'is_disabled': 'is_disabled',
+            'small': 'prefer_small_media',
+            'prefer_small': 'prefer_small_media',
+            'prefer_small_media': 'prefer_small_media',
+            'shrink': 'prefer_small_media',
+            'large': 'prefer_large_media',
+            'prefer_large': 'prefer_large_media',
+            'prefer_large_media': 'prefer_large_media',
+            'enlarge': 'prefer_large_media',
+            'above': 'show_above_text',
+            'show_above': 'show_above_text',
+            'show_above_text': 'show_above_text'
+        }
+        
+        if option not in option_map:
+            await update.message.reply_text(
+                "❌ Invalid option. Valid options:\n"
+                "• disabled (is_disabled)\n"
+                "• small (prefer_small_media)\n"
+                "• large (prefer_large_media)\n"
+                "• above (show_above_text)",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        # Update setting
+        param_name = option_map[option]
+        kwargs = {param_name: value}
+        updated_opts = self.config.update_link_preview_options(**kwargs)
+        
+        # Friendly names for display
+        friendly_names = {
+            'is_disabled': '🔘 Link Preview Disabled',
+            'prefer_small_media': '📷 Prefer Small Media (Shrink)',
+            'prefer_large_media': '🖼️ Prefer Large Media (Enlarge)',
+            'show_above_text': '⬆️ Show Above Text'
+        }
+        
+        await update.message.reply_text(
+            f"✅ <b>Link Preview Updated!</b>\n\n"
+            f"{friendly_names.get(param_name, param_name)}: <code>{value}</code>\n\n"
+            "📝 Current settings:\n"
+            f"🔘 is_disabled: <code>{updated_opts.get('is_disabled', False)}</code>\n"
+            f"📷 prefer_small_media: <code>{updated_opts.get('prefer_small_media', True)}</code>\n"
+            f"🖼️ prefer_large_media: <code>{updated_opts.get('prefer_large_media', False)}</code>\n"
+            f"⬆️ show_above_text: <code>{updated_opts.get('show_above_text', True)}</code>",
+            parse_mode=ParseMode.HTML
+        )
+        print(f"⚙️ Link preview settings updated by admin {user_id}: {param_name}={value}")
 
     async def error_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle Telegram errors"""
@@ -915,19 +1028,28 @@ class YouTubeTelegramBot:
         print("====================================================\n")
 
     async def send_notification_to_chat_text_only(self, chat_id, caption):
-        """Send text-only notification to a single chat"""
+        """Send text-only notification to a single chat with customized link preview"""
         try:
+            # Get link preview options from settings
+            preview_opts = self.config.get_link_preview_options()
+            link_preview = LinkPreviewOptions(
+                is_disabled=preview_opts.get('is_disabled', False),
+                prefer_small_media=preview_opts.get('prefer_small_media', True),
+                prefer_large_media=preview_opts.get('prefer_large_media', False),
+                show_above_text=preview_opts.get('show_above_text', False)
+            )
+            
             await self.bot.send_message(
                 chat_id=chat_id,
                 text=caption,
                 parse_mode=ParseMode.HTML,
-                disable_web_page_preview=False,
+                link_preview_options=link_preview,
                 read_timeout=30,
                 write_timeout=30,
                 connect_timeout=30,
                 pool_timeout=30
             )
-            print(f"✅ Sent text-only notification to chat {chat_id}")
+            print(f"✅ Sent text-only notification with link preview to chat {chat_id}")
             await asyncio.sleep(2)
             
         except Exception as e:
@@ -941,11 +1063,20 @@ class YouTubeTelegramBot:
                 print(f"⚠️ Network error for chat {chat_id}, retrying once: {str(e)}")
                 await asyncio.sleep(5)
                 try:
+                    # Get link preview options from settings
+                    preview_opts = self.config.get_link_preview_options()
+                    link_preview = LinkPreviewOptions(
+                        is_disabled=preview_opts.get('is_disabled', False),
+                        prefer_small_media=preview_opts.get('prefer_small_media', True),
+                        prefer_large_media=preview_opts.get('prefer_large_media', False),
+                        show_above_text=preview_opts.get('show_above_text', False)
+                    )
+                    
                     await self.bot.send_message(
                         chat_id=chat_id,
                         text=caption,
                         parse_mode=ParseMode.HTML,
-                        disable_web_page_preview=False,
+                        link_preview_options=link_preview,
                         read_timeout=30,
                         write_timeout=30,
                         connect_timeout=30,
@@ -1104,6 +1235,7 @@ class YouTubeTelegramBot:
         # Thumbnail control commands
         application.add_handler(CommandHandler('enable_thumbnails', self.cmd_enable_thumbnails))
         application.add_handler(CommandHandler('disable_thumbnails', self.cmd_disable_thumbnails))
+        application.add_handler(CommandHandler('set_link_preview', self.cmd_set_link_preview))
         
         # YouTube channel management commands
         application.add_handler(CommandHandler('add_youtube_channel', self.cmd_add_youtube_channel))

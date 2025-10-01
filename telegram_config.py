@@ -10,9 +10,11 @@ class TelegramConfig:
         self.data_folder = current_dir / 'Pydata'
         self.chats_file = self.data_folder / 'telegram_chats.json'
         self.channels_file = self.data_folder / 'influencers.json'
+        self.settings_file = self.data_folder / 'settings.json'
         self.ensure_data_folder()
         self.load_chats()
         self.load_channels()
+        self.load_settings()
 
     def ensure_data_folder(self):
         """Create pydata folder and initialize files if they don't exist"""
@@ -39,6 +41,11 @@ class TelegramConfig:
             with open(self.channels_file, 'w') as f:
                 json.dump(initial_channels, f, indent=4)
 
+        # Initialize settings.json if doesn't exist
+        if not self.settings_file.exists():
+            print(f"Initializing settings file: {self.settings_file}")
+            self.save_settings(self.get_default_settings())
+
     def load_chats(self):
         """Load chats from JSON file"""
         try:
@@ -60,6 +67,70 @@ class TelegramConfig:
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Error loading channels file: {str(e)}")
             self.channels = []
+
+    def get_default_settings(self):
+        """Get default settings configuration"""
+        return {
+            "thumbnails_enabled": False,
+            "link_preview_options": {
+                "is_disabled": False,
+                "prefer_small_media": True,
+                "prefer_large_media": False,
+                "show_above_text": True
+            }
+        }
+
+    def load_settings(self):
+        """Load settings from settings.json"""
+        try:
+            with open(self.settings_file, 'r') as f:
+                self.settings = json.load(f)
+            print(f"Loaded settings from {self.settings_file}")
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"No existing settings file found, using defaults")
+            self.settings = self.get_default_settings()
+            self.save_settings(self.settings)
+
+    def save_settings(self, settings=None):
+        """Save settings to settings.json"""
+        if settings is None:
+            settings = self.settings
+        with open(self.settings_file, 'w') as f:
+            json.dump(settings, f, indent=2)
+        self.settings = settings
+        print(f"Saved settings to {self.settings_file}")
+
+    def get_link_preview_options(self):
+        """Get link preview options from settings"""
+        return self.settings.get('link_preview_options', self.get_default_settings()['link_preview_options'])
+
+    def update_link_preview_options(self, is_disabled=None, prefer_small_media=None, 
+                                   prefer_large_media=None, show_above_text=None):
+        """Update link preview options in settings"""
+        if 'link_preview_options' not in self.settings:
+            self.settings['link_preview_options'] = self.get_default_settings()['link_preview_options']
+        
+        if is_disabled is not None:
+            self.settings['link_preview_options']['is_disabled'] = is_disabled
+        if prefer_small_media is not None:
+            self.settings['link_preview_options']['prefer_small_media'] = prefer_small_media
+        if prefer_large_media is not None:
+            self.settings['link_preview_options']['prefer_large_media'] = prefer_large_media
+        if show_above_text is not None:
+            self.settings['link_preview_options']['show_above_text'] = show_above_text
+        
+        self.save_settings()
+        return self.settings['link_preview_options']
+
+    def get_thumbnails_enabled(self):
+        """Get thumbnails enabled setting"""
+        return self.settings.get('thumbnails_enabled', True)
+
+    def set_thumbnails_enabled(self, enabled: bool):
+        """Update thumbnails enabled setting"""
+        self.settings['thumbnails_enabled'] = enabled
+        self.save_settings()
+        return enabled
 
     def save_chats(self, chats):
         """Save chats to JSON file"""

@@ -8,269 +8,69 @@
 
 ⏸️ PAUSE/RESUME CONTROL COMMANDS
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+ Command Reference — YouTube → Telegram Bot
 
-📌 /pause_notify
-   ├─ 🎯 Purpose: Temporarily pause all YouTube notifications
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /pause_notify
-   ├─ ✨ Special: Keeps all configurations intact
-   └─ 💡 Tip: Perfect for maintenance or when you're busy
+Simple, copy-friendly command list with examples and notes.
 
-📌 /unpause_notify
-   ├─ 🎯 Purpose: Resume YouTube notifications
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /unpause_notify
-   ├─ ✨ Special: Instantly resumes all monitoring
-   └─ 💡 Tip: Bot starts checking for new videos immediately
+Note: Most management commands require an admin user (`ADMIN_USERS` in `.env`).
 
-📌 /status_notify
-   ├─ 🎯 Purpose: Show current bot status and statistics
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /status_notify
-   ├─ 📊 Shows: Pause status, channel count, chat count, intervals
-   └─ 💡 Tip: Quick way to check if bot is paused or running
+Basic commands
+- /start_notify — Shows a welcome message and basic usage.
+- /help_notify — Prints the list of available commands.
+- /how_notify — Step-by-step setup guide for beginners.
 
-═══════════════════════════════════════════════════════════════
+Notification management (admin only)
+- /add_telegram_notify
+  - Purpose: Add the current chat or group to receive notifications.
+  - Usage: Type it inside the target group (bot must be admin).
 
-🖼️ THUMBNAIL CONTROL COMMANDS
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+- /remove_notify
+  - Purpose: Remove the current chat from notifications.
+  - Usage: Type it inside the group you want to remove.
 
-📌 /enable_thumbnails
-   ├─ 🎯 Purpose: Enable thumbnail images in notifications
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /enable_thumbnails
-   ├─ 🖼️ Effect: Notifications will include video thumbnail images
-   └─ 💡 Tip: Makes notifications more visually appealing
+- /list_notify
+  - Purpose: Show configured chats that will receive notifications.
 
-📌 /disable_thumbnails
-   ├─ 🎯 Purpose: Disable thumbnail images (text-only notifications)
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /disable_thumbnails
-   ├─ ⚡ Effect: Faster delivery, reduced data usage
-   └─ 💡 Tip: Good for low bandwidth or minimalist notifications
+Pause / resume (admin only)
+- /pause_notify — Pause all YouTube notifications temporarily.
+- /unpause_notify — Resume notifications.
+- /status_notify — Show pause state, channel count, chat count, and interval.
 
-═══════════════════════════════════════════════════════════════ENCE 🤖
-═══════════════════════════════════════════════════════════════
+Thumbnails (admin only)
+- /enable_thumbnails — Include video thumbnails in notifications.
+- /disable_thumbnails — Send text-only notifications with smart link preview (small preview below text).
+- /set_link_preview <option> <true|false> — Configure link preview options (settings saved in settings.json)
+  Options: is_disabled, prefer_small, prefer_large, show_above
+  Example: /set_link_preview prefer_small true
 
-📋 QUICK REFERENCE GUIDE FOR BEGINNERS
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+YouTube channel management (admin only)
+- /add_youtube_channel <name> <channel_id>
+  - Adds a YouTube channel for monitoring (no TG link).
+  - Example: /add_youtube_channel PewDiePie UC-lHJZR3Gqxm24_Vd_AJ5Yw
 
-🚀 GETTING STARTED COMMANDS
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+- /add_youtube_channel_with_group <name> <channel_id> <tg_link>
+  - Adds a channel with a Telegram group link. Notifications include a clickable "Join_MyTG" link.
+  - Example: /add_youtube_channel_with_group MikeTamago UCR3aArAyYGXwJegyRGZ7WTg https://t.me/tamagowarriors
 
-📌 /start_notify
-   ├─ 🎯 Purpose: Welcome message and bot introduction
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /start_notify
-   └─ 💡 Tip: Use this first to test if bot works
+- /remove_youtube_channel <channel_id>
+  - Removes a monitored channel.
 
-📌 /help_notify
-   ├─ 🎯 Purpose: Show all available commands
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /help_notify
-   └─ 💡 Tip: Your go-to reference for all commands
+- /list_youtube_channels
+  - Lists all monitored channels with IDs and optional TG links.
 
-📌 /how_notify
-   ├─ 🎯 Purpose: Step-by-step setup tutorial
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /how_notify
-   └─ 💡 Tip: Perfect for beginners - shows setup guide
+Tips for finding a YouTube channel ID
+- Look for URLs like `youtube.com/channel/UC...` and copy the `UC...` value.
+- For `youtube.com/@username` pages, use online tools or check View Page Source.
 
-═══════════════════════════════════════════════════════════════
+Beginner setup (quick)
+1. Add bot to your Telegram group and make it admin.
+2. In the group, run `/add_telegram_notify`.
+3. Add a YouTube channel with `/add_youtube_channel_with_group` (optional tg link).
+4. Verify with `/list_youtube_channels` and `/list_notify`.
 
-📢 NOTIFICATION MANAGEMENT COMMANDS
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+Common issues
+- "Bot not responding": Ensure `.env` has `TELEGRAM_BOT_TOKEN` and bot is running.
+- "Chat not found" or "Bot was blocked": The bot will remove invalid chats automatically.
+- "Could not find channel": Verify the channel ID is correct.
 
-� /add_telegram_notify
-   ├─ 🎯 Purpose: Add current chat to notification list
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Use in the group/channel you want notifications
-   ├─ ⚠️ Important: Bot must be admin in the group
-   └─ � Example: Go to your group → type /add_telegram_notify
-
-� /remove_notify
-   ├─ 🎯 Purpose: Stop notifications in current chat
-   ├─ � Who can use: Admins only
-   ├─ 📝 Usage: Use in the group you want to stop notifications
-   └─ � Tip: Instantly stops all video notifications
-
-� /list_notify
-   ├─ 🎯 Purpose: Show all chats receiving notifications
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /list_notify
-   └─ 💡 Shows: Chat names, types, IDs, and when they were added
-
-═══════════════════════════════════════════════════════════════
-
-📺 YOUTUBE CHANNEL MANAGEMENT COMMANDS
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-📌 /add_youtube_channel
-   ├─ 🎯 Purpose: Add YouTube channel (without Telegram group)
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: /add_youtube_channel [channel_name] [channel_id]
-   ├─ 🌟 Example: /add_youtube_channel PewDiePie UC-lHJZR3Gqxm24_Vd_AJ5Yw
-   └─ 💡 Tip: Channel will be verified before adding
-
-📌 /add_youtube_channel_with_group
-   ├─ 🎯 Purpose: Add YouTube channel WITH Telegram group link
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: /add_youtube_channel_with_group [name] [id] [tg_link]
-   ├─ 🌟 Example: /add_youtube_channel_with_group MikeTamago UCR3aArAyYGXwJegyRGZ7WTg https://t.me/tamagowarriors
-   ├─ ✨ Special: Creates clickable "Join_MyTG" links in notifications
-   └─ 💡 Tip: Telegram link must start with https://t.me/ or t.me/
-
-📌 /remove_youtube_channel
-   ├─ 🎯 Purpose: Remove YouTube channel from monitoring
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: /remove_youtube_channel [channel_id]
-   ├─ 🌟 Example: /remove_youtube_channel UC-lHJZR3Gqxm24_Vd_AJ5Yw
-   └─ 💡 Tip: Use /list_youtube_channels to see channel IDs
-
-📌 /list_youtube_channels
-   ├─ 🎯 Purpose: Show all monitored YouTube channels
-   ├─ 👤 Who can use: Admins only
-   ├─ 📝 Usage: Just type /list_youtube_channels
-   └─ 💡 Shows: Channel names, IDs, and Telegram group links
-
-═══════════════════════════════════════════════════════════════
-
-🔍 HOW TO FIND YOUTUBE CHANNEL ID
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-Method 1: From Channel URL
-├─ 🌐 Go to: youtube.com/channel/UC-lHJZR3Gqxm24_Vd_AJ5Yw
-├─ 📋 Copy: UC-lHJZR3Gqxm24_Vd_AJ5Yw (the part after /channel/)
-└─ ✅ That's your channel ID!
-
-Method 2: From Custom URL
-├─ 🌐 Go to: youtube.com/@channelname
-├─ 👀 Look for "View channel ID" option
-├─ 🖱️ Right-click → View page source
-└─ 🔍 Search for: "UC" (channel IDs start with UC)
-
-Method 3: Online Tools
-├─ 🔧 Use: commentpicker.com/youtube-channel-id.php
-├─ 📝 Paste: Channel URL
-└─ ✨ Get: Channel ID instantly
-
-═══════════════════════════════════════════════════════════════
-
-🎯 STEP-BY-STEP SETUP FOR BEGINNERS
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-STEP 1: 🤖 Test Your Bot
-├─ 💬 Send: /start_notify (to check if bot responds)
-├─ ❓ Send: /help_notify (to see all commands)
-├─ 📊 Send: /status_notify (to check bot status)
-└─ ✅ If bot responds, you're ready to proceed!
-
-STEP 2: 📺 Add Your First YouTube Channel
-├─ 🔍 Find the YouTube channel ID (see guide above)
-├─ 💬 Send: /add_youtube_channel_with_group ChannelName ChannelID https://t.me/yourgroup
-├─ 🌟 Example: /add_youtube_channel_with_group MrBeast UCX6OQ3DkcsbYNE6H8uQQuVA https://t.me/mrbeastfans
-└─ ✅ Bot will verify the channel exists
-
-STEP 3: 📱 Set Up Telegram Notifications
-├─ ➕ Add bot to your Telegram group/channel
-├─ 👑 Make bot an administrator (important!)
-├─ 💬 In the group, send: /add_telegram_notify
-└─ ✅ Bot will confirm the group is added
-
-STEP 4: 🔍 Verify Your Setup
-├─ 💬 Send: /list_youtube_channels (see your channels)
-├─ 💬 Send: /list_notify (see your notification groups)
-├─ 📊 Send: /status_notify (check if bot is running)
-└─ ✅ Everything listed? You're all set!
-
-STEP 5: 🎛️ Control Your Notifications
-├─ ⏸️ Send: /pause_notify (to pause when busy)
-├─ ▶️ Send: /unpause_notify (to resume notifications)
-└─ 📊 Send: /status_notify (to check current state)
-
-═══════════════════════════════════════════════════════════════
-
-🎨 NOTIFICATION PREVIEW
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-When a new video is uploaded, you'll receive:
-
-🔥 NEW UPLOAD WATCH NOW 🔥
-═══════════════════════════
-🎬 Amazing Video Title Here
-📺 Channel Name
-📅 2024-10-01 15:30 UTC
-Join_MyTG #ChannelName
-
-Features:
-├─ 🖼️ Video thumbnail image
-├─ 🔗 Clickable video title (opens YouTube)
-├─ 🔗 Clickable channel name (opens channel)
-├─ 🔗 Clickable "Join_MyTG" (opens Telegram group)
-└─ 🏷️ Hashtag with channel name
-
-═══════════════════════════════════════════════════════════════
-
-⚠️ COMMON ISSUES & SOLUTIONS
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-🚫 "Sorry, only admin users can use this bot"
-└─ 💡 Solution: Your Telegram user ID is not in ADMIN_USERS
-
-❌ "Could not find YouTube channel with ID"
-└─ 💡 Solution: Double-check the channel ID is correct
-
-🔐 "Chat not found" or "Bot was blocked"
-└─ 💡 Solution: Bot will automatically remove invalid chats
-
-⚡ "Network timeout" or connection errors
-└─ 💡 Solution: Check internet connection, bot will retry automatically
-
-🚯 Bot not responding at all
-├─ 🔍 Check: .env file has correct TELEGRAM_BOT_TOKEN
-├─ 🔍 Check: Bot is running (python YT-BOT.py)
-└─ 🔍 Check: No errors in terminal output
-
-═══════════════════════════════════════════════════════════════
-
-🏆 PRO TIPS FOR ADVANCED USERS
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-💡 Tip 1: Organize Your Channels
-├─ 📁 Group similar channels together
-├─ 🏷️ Use descriptive names when adding channels
-└─ 📝 Keep a list of your channel IDs for backup
-
-💡 Tip 2: Optimize Check Intervals
-├─ ⚡ CHECK_INTERVAL=300 (5 min) - Good for active channels
-├─ 🐌 CHECK_INTERVAL=600 (10 min) - Good for less active channels
-└─ ⚠️ Don't go below 60 seconds (API rate limits)
-
-💡 Tip 3: Multiple Notification Groups
-├─ 🎯 Different groups for different types of content
-├─ 👥 Gaming channels → Gaming group
-├─ 🎵 Music channels → Music group
-└─ 📚 Educational channels → Learning group
-
-💡 Tip 4: Backup Your Configuration
-├─ 💾 Save your .env file
-├─ 💾 Backup Pydata/influencers.json
-└─ 💾 Backup Pydata/telegram_chats.json
-
-═══════════════════════════════════════════════════════════════
-
-📞 SUPPORT & COMMUNITY
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-🐛 Found a bug? → Open an issue on GitHub
-💡 Have an idea? → Submit a feature request
-❓ Need help? → Check this command reference first
-📚 Documentation → README.md has detailed guides
-🌟 Love the bot? → Star the GitHub repository!
-
-═══════════════════════════════════════════════════════════════
-
-Made with ❤️ for the YouTube & Telegram community
-Last updated: October 2024 | Version: 2.0
-
-═══════════════════════════════════════════════════════════════
+Need more help? Open the full README in the project root or raise an issue on GitHub.
