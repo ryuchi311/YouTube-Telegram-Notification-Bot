@@ -152,6 +152,11 @@ YouTube-Telegram-Notification-Bot/
 | `/add_telegram_notify` | ➕ | Add current chat to notification list | Use in your group |
 | `/remove_notify` | ➖ | Remove current chat from notifications | Stop notifications here |
 | `/list_notify` | 📝 | Show all chats receiving notifications | See your setup |
+| `/pause_notify` | ⏸️ | Pause all YouTube notifications temporarily | Stop without removing config |
+| `/unpause_notify` | ▶️ | Resume YouTube notifications | Start notifications again |
+| `/status_notify` | 📊 | Show current bot status and statistics | Check if paused/running |
+| `/enable_thumbnails` | 🖼️ | Enable thumbnail images in notifications | Show video previews |
+| `/disable_thumbnails` | 📝 | Disable thumbnails (text-only messages) | Faster delivery, less data |
 
 ### 📺 YouTube Channel Management Commands
 

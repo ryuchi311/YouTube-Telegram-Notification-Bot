@@ -34,6 +34,8 @@ class YouTubeTelegramBot:
         self.config = TelegramConfig()
         self.check_interval = int(os.getenv('CHECK_INTERVAL', '300'))
         self.running = False
+        self.paused = False  # Add pause state
+        self.thumbnails_enabled = True  # Add thumbnail control
         self.last_check = {}
         self.shutdown_event = asyncio.Event()
         self.channel_cache = {}
@@ -118,7 +120,14 @@ class YouTubeTelegramBot:
             "/add_telegram_notify - Add current chat to notification list\n"
             "/remove_notify - Remove current chat from notification list\n"
             "/list_notify - List all chats receiving notifications\n\n"
-            "📺 <b>YouTube Channel Commands:</b>\n"
+            "⏸️ <b>Control Commands:</b>\n"
+            "/pause_notify - Pause all YouTube notifications\n"
+            "/unpause_notify - Resume YouTube notifications\n"
+            "/status_notify - Show current bot status\n\n"
+            "�️ <b>Thumbnail Commands:</b>\n"
+            "/enable_thumbnails - Enable thumbnail images in notifications\n"
+            "/disable_thumbnails - Disable thumbnail images (text only)\n\n"
+            "�📺 <b>YouTube Channel Commands:</b>\n"
             "/add_youtube_channel - Add a YouTube channel to monitor\n"
             "/add_youtube_channel_with_group - Add a YouTube channel with Telegram group\n"
             "/remove_youtube_channel - Remove a YouTube channel\n"
@@ -318,6 +327,168 @@ class YouTubeTelegramBot:
                 f"❌ Error listing chats: {str(e)}",
                 parse_mode=ParseMode.HTML
             )
+
+    async def cmd_pause(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /pause_notify command"""
+        user_id = update.effective_user.id
+        
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if self.paused:
+            await update.message.reply_text(
+                "ℹ️ Notifications are already paused.\n\n"
+                "Use /unpause_notify to resume notifications.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        self.paused = True
+        await update.message.reply_text(
+            "⏸️ <b>YouTube notifications have been paused!</b>\n\n"
+            "📺 The bot will continue running but won't send any notifications.\n"
+            "📱 Your channels and chat configurations remain intact.\n\n"
+            "Use /unpause_notify to resume notifications.",
+            parse_mode=ParseMode.HTML
+        )
+        print(f"🔔 Notifications paused by admin user {user_id}")
+
+    async def cmd_unpause(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /unpause_notify command"""
+        user_id = update.effective_user.id
+        
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if not self.paused:
+            await update.message.reply_text(
+                "ℹ️ Notifications are already running.\n\n"
+                "Use /pause_notify to pause notifications.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        self.paused = False
+        await update.message.reply_text(
+            "▶️ <b>YouTube notifications have been resumed!</b>\n\n"
+            "📺 The bot will now check for new videos and send notifications.\n"
+            "🔔 All your channels and chats are active again.\n\n"
+            "Use /pause_notify to pause notifications anytime.",
+            parse_mode=ParseMode.HTML
+        )
+        print(f"🔔 Notifications resumed by admin user {user_id}")
+
+    async def cmd_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /status_notify command"""
+        user_id = update.effective_user.id
+        
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        # Get bot status information
+        channels = self.config.get_youtube_channels()
+        chats = self.config.get_chats()
+        
+        status_icon = "⏸️" if self.paused else "▶️"
+        status_text = "PAUSED" if self.paused else "RUNNING"
+        thumbnail_icon = "🖼️" if self.thumbnails_enabled else "📝"
+        thumbnail_text = "ENABLED" if self.thumbnails_enabled else "DISABLED"
+        
+        status_message = (
+            f"🤖 <b>Bot Status Report</b>\n\n"
+            f"{status_icon} <b>Status:</b> {status_text}\n"
+            f"{thumbnail_icon} <b>Thumbnails:</b> {thumbnail_text}\n"
+            f"📺 <b>YouTube Channels:</b> {len(channels)} monitored\n"
+            f"💬 <b>Telegram Chats:</b> {len(chats)} active\n"
+            f"⏱️ <b>Check Interval:</b> {self.check_interval} seconds\n"
+            f"🤖 <b>Bot Running:</b> {'Yes' if self.running else 'No'}\n\n"
+        )
+        
+        if self.paused:
+            status_message += (
+                "⏸️ <b>Notifications are currently paused.</b>\n"
+                "Use /unpause_notify to resume."
+            )
+        else:
+            status_message += (
+                "▶️ <b>Bot is actively monitoring channels.</b>\n"
+                "Use /pause_notify to temporarily pause."
+            )
+            
+        await update.message.reply_text(
+            status_message,
+            parse_mode=ParseMode.HTML
+        )
+
+    async def cmd_enable_thumbnails(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /enable_thumbnails command"""
+        user_id = update.effective_user.id
+        
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if self.thumbnails_enabled:
+            await update.message.reply_text(
+                "ℹ️ Thumbnails are already enabled.\n\n"
+                "Use /disable_thumbnails to turn off thumbnail images.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        self.thumbnails_enabled = True
+        await update.message.reply_text(
+            "🖼️ <b>Thumbnails have been enabled!</b>\n\n"
+            "📸 Notifications will now include video thumbnail images.\n"
+            "🎨 Your notifications will be more visually appealing.\n\n"
+            "Use /disable_thumbnails to turn off thumbnails anytime.",
+            parse_mode=ParseMode.HTML
+        )
+        print(f"🖼️ Thumbnails enabled by admin user {user_id}")
+
+    async def cmd_disable_thumbnails(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /disable_thumbnails command"""
+        user_id = update.effective_user.id
+        
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if not self.thumbnails_enabled:
+            await update.message.reply_text(
+                "ℹ️ Thumbnails are already disabled.\n\n"
+                "Use /enable_thumbnails to turn on thumbnail images.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        self.thumbnails_enabled = False
+        await update.message.reply_text(
+            "📝 <b>Thumbnails have been disabled!</b>\n\n"
+            "📄 Notifications will now be text-only messages.\n"
+            "⚡ This may improve delivery speed and reduce data usage.\n\n"
+            "Use /enable_thumbnails to turn on thumbnails anytime.",
+            parse_mode=ParseMode.HTML
+        )
+        print(f"📝 Thumbnails disabled by admin user {user_id}")
 
     async def error_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle Telegram errors"""
@@ -667,10 +838,14 @@ class YouTubeTelegramBot:
             f"{join_link} #{video['snippet']['channelTitle'].replace(' ', '')}"
         )
 
-        await self.send_notifications(thumbnail_data, caption)
+        # Send with or without thumbnail based on settings
+        if self.thumbnails_enabled:
+            await self.send_notifications(thumbnail_data, caption)
+        else:
+            await self.send_notifications_text_only(caption)
 
     async def send_notifications(self, thumbnail_data, caption):
-        """Send notifications to all configured Telegram chats"""
+        """Send notifications with thumbnails to all configured Telegram chats"""
         chat_ids = self.config.get_telegram_chats()
         total_chats = len(chat_ids)
 
@@ -685,7 +860,7 @@ class YouTubeTelegramBot:
             batch = chat_ids[i:i + batch_size]
             for chat_id in batch:
                 try:
-                    await self.send_notification_to_chat(chat_id, thumbnail_data, caption)
+                    await self.send_notification_to_chat_with_thumbnail(chat_id, thumbnail_data, caption)
                     success_chats.append(chat_id)
                 except Exception as e:
                     failed_chats[chat_id] = str(e)
@@ -694,7 +869,7 @@ class YouTubeTelegramBot:
                 await asyncio.sleep(3)
 
         # Simplified and clean report for monitoring
-        print("\n================ Notification Report ================")
+        print("\n================ Notification Report (With Thumbnails) ================")
         print(f"📬 Total Chats: {total_chats} | ✅ Success: {len(success_chats)} | ❌ Failed: {len(failed_chats)}")
 
         if failed_chats:
@@ -704,10 +879,88 @@ class YouTubeTelegramBot:
 
         print("====================================================\n")
 
+    async def send_notifications_text_only(self, caption):
+        """Send text-only notifications to all configured Telegram chats"""
+        chat_ids = self.config.get_telegram_chats()
+        total_chats = len(chat_ids)
+
+        success_chats = []
+        failed_chats = {}
+
+        batch_size = 3
+        for i in range(0, total_chats, batch_size):
+            if self.shutdown_event.is_set():
+                return
+
+            batch = chat_ids[i:i + batch_size]
+            for chat_id in batch:
+                try:
+                    await self.send_notification_to_chat_text_only(chat_id, caption)
+                    success_chats.append(chat_id)
+                except Exception as e:
+                    failed_chats[chat_id] = str(e)
+
+            if i + batch_size < total_chats:
+                await asyncio.sleep(3)
+
+        # Simplified and clean report for monitoring
+        print("\n================ Notification Report (Text Only) ================")
+        print(f"📬 Total Chats: {total_chats} | ✅ Success: {len(success_chats)} | ❌ Failed: {len(failed_chats)}")
+
+        if failed_chats:
+            print("⚠️ Failed Chats:")
+            for chat_id, error in failed_chats.items():
+                print(f"  - {chat_id}: {error}")
+
+        print("====================================================\n")
+
+    async def send_notification_to_chat_text_only(self, chat_id, caption):
+        """Send text-only notification to a single chat"""
+        try:
+            await self.bot.send_message(
+                chat_id=chat_id,
+                text=caption,
+                parse_mode=ParseMode.HTML,
+                disable_web_page_preview=False,
+                read_timeout=30,
+                write_timeout=30,
+                connect_timeout=30,
+                pool_timeout=30
+            )
+            print(f"✅ Sent text-only notification to chat {chat_id}")
+            await asyncio.sleep(2)
+            
+        except Exception as e:
+            error_message = str(e).lower()
+            if "chat not found" in error_message or "bot was blocked" in error_message:
+                print(f"❌ Chat {chat_id} not accessible (will be removed): {str(e)}")
+                self.config.remove_telegram_chat(chat_id)
+                return
+            
+            if "timeout" in error_message or "connection" in error_message:
+                print(f"⚠️ Network error for chat {chat_id}, retrying once: {str(e)}")
+                await asyncio.sleep(5)
+                try:
+                    await self.bot.send_message(
+                        chat_id=chat_id,
+                        text=caption,
+                        parse_mode=ParseMode.HTML,
+                        disable_web_page_preview=False,
+                        read_timeout=30,
+                        write_timeout=30,
+                        connect_timeout=30,
+                        pool_timeout=30
+                    )
+                    print(f"✅ Retry successful for chat {chat_id}")
+                except Exception as retry_e:
+                    print(f"❌ Retry failed for chat {chat_id}: {str(retry_e)}")
+            else:
+                print(f"❌ Failed to send to chat {chat_id}: {str(e)}")
+
         
 
-    async def send_notification_to_chat(self, chat_id, thumbnail_data, caption):
-        """Send notification to a single chat"""
+    async def send_notification_to_chat_with_thumbnail(self, chat_id, thumbnail_data, caption):
+        """Send notification with thumbnail to a single chat"""
         try:
             await self.bot.send_photo(
                 chat_id=chat_id,
@@ -719,7 +972,7 @@ class YouTubeTelegramBot:
                 connect_timeout=30,
                 pool_timeout=30
             )
-            print(f"✅ Sent notification to chat {chat_id}")
+            print(f"✅ Sent notification with thumbnail to chat {chat_id}")
             await asyncio.sleep(2)
             
         except Exception as e:
@@ -749,6 +1002,10 @@ class YouTubeTelegramBot:
             else:
                 print(f"❌ Failed to send to chat {chat_id}: {str(e)}")
 
+    async def send_notification_to_chat(self, chat_id, thumbnail_data, caption):
+        """Send notification to a single chat (alias for backward compatibility)"""
+        await self.send_notification_to_chat_with_thumbnail(chat_id, thumbnail_data, caption)
+
     async def monitor_channels(self):
         """Main monitoring loop"""
         self.running = True
@@ -757,6 +1014,18 @@ class YouTubeTelegramBot:
         total_chats = len(self.config.get_telegram_chats())  # Calculate total chats
         while not self.shutdown_event.is_set():
             try:
+                # Check if notifications are paused
+                if self.paused:
+                    print(f"⏸️ Notifications paused - skipping check at {datetime.now()}")
+                    try:
+                        await asyncio.wait_for(
+                            self.shutdown_event.wait(), 
+                            timeout=self.check_interval
+                        )
+                    except asyncio.TimeoutError:
+                        pass
+                    continue
+                
                 channels = self.config.get_youtube_channels()
                 print(f"\nChecking {len(channels)} channels at {datetime.now()}")
                 print("Channels to check:", ", ".join(c['name'] for c in channels))
@@ -826,6 +1095,15 @@ class YouTubeTelegramBot:
         application.add_handler(CommandHandler('add_telegram_notify', self.cmd_add))
         application.add_handler(CommandHandler('remove_notify', self.cmd_remove))
         application.add_handler(CommandHandler('list_notify', self.cmd_list))
+        
+        # Control commands
+        application.add_handler(CommandHandler('pause_notify', self.cmd_pause))
+        application.add_handler(CommandHandler('unpause_notify', self.cmd_unpause))
+        application.add_handler(CommandHandler('status_notify', self.cmd_status))
+        
+        # Thumbnail control commands
+        application.add_handler(CommandHandler('enable_thumbnails', self.cmd_enable_thumbnails))
+        application.add_handler(CommandHandler('disable_thumbnails', self.cmd_disable_thumbnails))
         
         # YouTube channel management commands
         application.add_handler(CommandHandler('add_youtube_channel', self.cmd_add_youtube_channel))

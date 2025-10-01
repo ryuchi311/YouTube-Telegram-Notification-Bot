@@ -1,4 +1,55 @@
-🤖 YOUTUBE TELEGRAM NOTIFICATION BOT - COMMAND REFERENCE 🤖
+🤖 YOUTUBE TELEGRAM NOTIFICATION BOT - COMMAN📌 /list_notify
+   ├─ 🎯 Purpose: Show all chats receiving notifications
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /list_notify
+   └─ 💡 Shows: Chat names, types, IDs, and when they were added
+
+═══════════════════════════════════════════════════════════════
+
+⏸️ PAUSE/RESUME CONTROL COMMANDS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+📌 /pause_notify
+   ├─ 🎯 Purpose: Temporarily pause all YouTube notifications
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /pause_notify
+   ├─ ✨ Special: Keeps all configurations intact
+   └─ 💡 Tip: Perfect for maintenance or when you're busy
+
+📌 /unpause_notify
+   ├─ 🎯 Purpose: Resume YouTube notifications
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /unpause_notify
+   ├─ ✨ Special: Instantly resumes all monitoring
+   └─ 💡 Tip: Bot starts checking for new videos immediately
+
+📌 /status_notify
+   ├─ 🎯 Purpose: Show current bot status and statistics
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /status_notify
+   ├─ 📊 Shows: Pause status, channel count, chat count, intervals
+   └─ 💡 Tip: Quick way to check if bot is paused or running
+
+═══════════════════════════════════════════════════════════════
+
+🖼️ THUMBNAIL CONTROL COMMANDS
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+📌 /enable_thumbnails
+   ├─ 🎯 Purpose: Enable thumbnail images in notifications
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /enable_thumbnails
+   ├─ 🖼️ Effect: Notifications will include video thumbnail images
+   └─ 💡 Tip: Makes notifications more visually appealing
+
+📌 /disable_thumbnails
+   ├─ 🎯 Purpose: Disable thumbnail images (text-only notifications)
+   ├─ 👤 Who can use: Admins only
+   ├─ 📝 Usage: Just type /disable_thumbnails
+   ├─ ⚡ Effect: Faster delivery, reduced data usage
+   └─ 💡 Tip: Good for low bandwidth or minimalist notifications
+
+═══════════════════════════════════════════════════════════════ENCE 🤖
 ═══════════════════════════════════════════════════════════════
 
 📋 QUICK REFERENCE GUIDE FOR BEGINNERS
@@ -111,6 +162,7 @@ Method 3: Online Tools
 STEP 1: 🤖 Test Your Bot
 ├─ 💬 Send: /start_notify (to check if bot responds)
 ├─ ❓ Send: /help_notify (to see all commands)
+├─ 📊 Send: /status_notify (to check bot status)
 └─ ✅ If bot responds, you're ready to proceed!
 
 STEP 2: 📺 Add Your First YouTube Channel
@@ -128,7 +180,13 @@ STEP 3: 📱 Set Up Telegram Notifications
 STEP 4: 🔍 Verify Your Setup
 ├─ 💬 Send: /list_youtube_channels (see your channels)
 ├─ 💬 Send: /list_notify (see your notification groups)
+├─ 📊 Send: /status_notify (check if bot is running)
 └─ ✅ Everything listed? You're all set!
+
+STEP 5: 🎛️ Control Your Notifications
+├─ ⏸️ Send: /pause_notify (to pause when busy)
+├─ ▶️ Send: /unpause_notify (to resume notifications)
+└─ 📊 Send: /status_notify (to check current state)
 
 ═══════════════════════════════════════════════════════════════
 
