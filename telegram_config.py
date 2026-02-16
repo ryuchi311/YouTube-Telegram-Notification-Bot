@@ -53,6 +53,16 @@ class TelegramConfig:
         try:
             with open(self.chats_file, 'r') as f:
                 self.chats = json.load(f)
+            changed = False
+            for chat in self.chats:
+                if 'channel_filter_enabled' not in chat:
+                    chat['channel_filter_enabled'] = False
+                    changed = True
+                if 'allowed_channel_ids' not in chat or not isinstance(chat.get('allowed_channel_ids'), list):
+                    chat['allowed_channel_ids'] = []
+                    changed = True
+            if changed:
+                self.save_chats(self.chats)
             print(f"Loaded {len(self.chats)} chats from {self.chats_file}")
         except (FileNotFoundError, json.JSONDecodeError):
             print(f"No existing chats file found, starting fresh")
@@ -191,7 +201,9 @@ class TelegramConfig:
             'id': chat_id,
             'title': chat_title or str(chat_id),
             'type': chat_type or 'unknown',
-            'added_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'added_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'channel_filter_enabled': False,
+            'allowed_channel_ids': []
         }
         
         self.chats.append(chat_data)
@@ -213,6 +225,124 @@ class TelegramConfig:
             return True
         print(f"Chat {chat_id} not found in config")
         return False
+
+    def remove_telegram_chat(self, chat_id: int) -> bool:
+        """Backward-compatible alias for removing chat."""
+        return self.remove_chat(chat_id)
+
+    def get_chat(self, chat_id: int) -> dict:
+        """Get chat object by chat ID."""
+        chat_id = int(chat_id)
+        for chat in self.chats:
+            if chat.get('id') == chat_id:
+                return chat
+        return None
+
+    def set_chat_channel_filter_enabled(self, chat_id: int, enabled: bool) -> bool:
+        """Enable or disable per-chat channel filtering."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return False
+        chat['channel_filter_enabled'] = bool(enabled)
+        if 'allowed_channel_ids' not in chat or not isinstance(chat.get('allowed_channel_ids'), list):
+            chat['allowed_channel_ids'] = []
+        self.save_chats(self.chats)
+        return True
+
+    def add_allowed_channel_for_chat(self, chat_id: int, channel_id: str) -> bool:
+        """Allow a YouTube channel for a specific chat."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return False
+
+        channel_id = channel_id.strip()
+        if 'allowed_channel_ids' not in chat or not isinstance(chat.get('allowed_channel_ids'), list):
+            chat['allowed_channel_ids'] = []
+
+        if channel_id in chat['allowed_channel_ids']:
+            return False
+
+        chat['allowed_channel_ids'].append(channel_id)
+        self.save_chats(self.chats)
+        return True
+
+    def remove_allowed_channel_for_chat(self, chat_id: int, channel_id: str) -> bool:
+        """Disallow a YouTube channel for a specific chat."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return False
+
+        channel_id = channel_id.strip()
+        allowed = chat.get('allowed_channel_ids', [])
+        if channel_id not in allowed:
+            return False
+
+        chat['allowed_channel_ids'] = [cid for cid in allowed if cid != channel_id]
+        self.save_chats(self.chats)
+        return True
+
+    def get_allowed_channels_for_chat(self, chat_id: int) -> list:
+        """Return allowed channel IDs for a specific chat."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return []
+        allowed = chat.get('allowed_channel_ids', [])
+        return allowed if isinstance(allowed, list) else []
+
+    def is_channel_allowed_for_chat(self, chat_id: int, channel_id: str) -> bool:
+        """Check if a channel is allowed for a specific chat."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return False
+
+        filter_enabled = chat.get('channel_filter_enabled', False)
+        if not filter_enabled:
+            return True
+
+        return channel_id in chat.get('allowed_channel_ids', [])
+
+    def get_chat_filter_status(self, chat_id: int) -> dict:
+        """Get filtering status and allowed channels for a chat."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return {
+                'exists': False,
+                'channel_filter_enabled': False,
+                'allowed_channel_ids': []
+            }
+
+        return {
+            'exists': True,
+            'channel_filter_enabled': chat.get('channel_filter_enabled', False),
+            'allowed_channel_ids': chat.get('allowed_channel_ids', [])
+        }
+
+    def set_allowed_channels_for_chat(self, chat_id: int, channel_ids: list) -> bool:
+        """Replace the allowed channel IDs for a chat with the provided list.
+
+        This will normalize IDs to strings, deduplicate, and save the chats file.
+        Returns True on success, False if the chat doesn't exist.
+        """
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return False
+
+        # Normalize and deduplicate
+        normalized = []
+        for cid in channel_ids:
+            if not isinstance(cid, str):
+                cid = str(cid)
+            cid = cid.strip()
+            if cid and cid not in normalized:
+                normalized.append(cid)
+
+        chat['allowed_channel_ids'] = normalized
+        # Ensure filter flag exists; do not auto-enable here (caller may enable)
+        if 'channel_filter_enabled' not in chat:
+            chat['channel_filter_enabled'] = False
+
+        self.save_chats(self.chats)
+        return True
 
     #-------------------------------------------------------------------------#
     def add_youtube_channel(self, channel_name: str, channel_id: str, tg_group: str = None) -> bool:

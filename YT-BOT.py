@@ -133,6 +133,12 @@ class YouTubeTelegramBot:
             "/add_youtube_channel_with_group - Add a YouTube channel with Telegram group\n"
             "/remove_youtube_channel - Remove a YouTube channel\n"
             "/list_youtube_channels - List all monitored channels\n\n"
+            "👥 <b>Group Filter Commands:</b>\n"
+            "/enable_group_filter_notify - Only allow selected channels in this group\n"
+            "/disable_group_filter_notify - Allow all channels in this group\n"
+            "/allow_channel_notify - Allow one YouTube channel for this group\n"
+            "/disallow_channel_notify - Remove one allowed channel for this group\n"
+            "/list_group_filter_notify - Show this group's channel filter status\n\n"
             "❓ <b>Other Commands:</b>\n"
             "/start_notify - Show welcome message\n"
             "/help_notify - Show this help message\n"
@@ -177,6 +183,7 @@ class YouTubeTelegramBot:
             "<b>4. Management:</b>\n"
             "• Remove channels: /remove_youtube_channel [channel_id]\n"
             "• Stop notifications: /remove_notify\n"
+            "• Group channel control: /enable_group_filter_notify, /allow_channel_notify [channel_id], /list_group_filter_notify\n"
             "• List settings: /list_notify and /list_youtube_channels\n\n"
             "For command list, use /help_notify"
         )
@@ -833,6 +840,300 @@ class YouTubeTelegramBot:
             message,
             parse_mode=ParseMode.HTML
         )
+
+    async def cmd_enable_group_filter(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Enable per-group channel filter for current chat."""
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        chat = self.config.get_chat(chat_id)
+        if not chat:
+            await update.message.reply_text(
+                "❌ This chat is not in the notification list yet.\n"
+                "Use /add_telegram_notify first.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        self.config.set_chat_channel_filter_enabled(chat_id, True)
+        allowed_count = len(self.config.get_allowed_channels_for_chat(chat_id))
+        await update.message.reply_text(
+            "✅ <b>Group filter enabled.</b>\n\n"
+            f"Only allowed channels will be sent in this chat.\n"
+            f"Currently allowed: <code>{allowed_count}</code>\n\n"
+            "Use /allow_channel_notify &lt;channel_id&gt; to allow channels.",
+            parse_mode=ParseMode.HTML
+        )
+
+    async def cmd_disable_group_filter(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Disable per-group channel filter for current chat."""
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        chat = self.config.get_chat(chat_id)
+        if not chat:
+            await update.message.reply_text(
+                "❌ This chat is not in the notification list yet.\n"
+                "Use /add_telegram_notify first.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        self.config.set_chat_channel_filter_enabled(chat_id, False)
+        await update.message.reply_text(
+            "✅ <b>Group filter disabled.</b>\n\n"
+            "This chat will now receive notifications from all monitored channels.",
+            parse_mode=ParseMode.HTML
+        )
+
+    async def cmd_allow_channel_notify(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Allow a specific YouTube channel for current chat."""
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if not context.args:
+            await update.message.reply_text(
+                "❌ Usage: /allow_channel_notify <channel_id>\n\n"
+                "Use /list_youtube_channels to view available channel IDs.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        chat = self.config.get_chat(chat_id)
+        if not chat:
+            await update.message.reply_text(
+                "❌ This chat is not in the notification list yet.\n"
+                "Use /add_telegram_notify first.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        channel_id = context.args[0].strip()
+        channel = self.config.get_youtube_channel(channel_id)
+        if not channel:
+            await update.message.reply_text(
+                f"❌ Channel ID <code>{channel_id}</code> is not in monitored channels.\n"
+                "Use /list_youtube_channels first.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        added = self.config.add_allowed_channel_for_chat(chat_id, channel_id)
+        if added:
+            await update.message.reply_text(
+                "✅ Channel allowed for this group.\n\n"
+                f"Channel: <b>{channel['name']}</b>\n"
+                f"ID: <code>{channel_id}</code>",
+                parse_mode=ParseMode.HTML
+            )
+        else:
+            await update.message.reply_text(
+                "ℹ️ This channel is already allowed in this group.\n\n"
+                f"Channel: <b>{channel['name']}</b>",
+                parse_mode=ParseMode.HTML
+            )
+
+    async def cmd_disallow_channel_notify(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Remove a specific allowed channel for current chat."""
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if not context.args:
+            await update.message.reply_text(
+                "❌ Usage: /disallow_channel_notify <channel_id>",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        chat = self.config.get_chat(chat_id)
+        if not chat:
+            await update.message.reply_text(
+                "❌ This chat is not in the notification list yet.\n"
+                "Use /add_telegram_notify first.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        channel_id = context.args[0].strip()
+        channel = self.config.get_youtube_channel(channel_id)
+        removed = self.config.remove_allowed_channel_for_chat(chat_id, channel_id)
+
+        if removed:
+            channel_name = channel['name'] if channel else channel_id
+            await update.message.reply_text(
+                "✅ Channel removed from this group allowlist.\n\n"
+                f"Channel: <b>{channel_name}</b>\n"
+                f"ID: <code>{channel_id}</code>",
+                parse_mode=ParseMode.HTML
+            )
+        else:
+            await update.message.reply_text(
+                f"ℹ️ Channel <code>{channel_id}</code> was not in this group's allowlist.",
+                parse_mode=ParseMode.HTML
+            )
+
+    async def cmd_list_group_filter_notify(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show current group's channel filter configuration."""
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        chat = self.config.get_chat(chat_id)
+        if not chat:
+            await update.message.reply_text(
+                "❌ This chat is not in the notification list yet.\n"
+                "Use /add_telegram_notify first.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        status = self.config.get_chat_filter_status(chat_id)
+        enabled = status['channel_filter_enabled']
+        allowed_ids = status['allowed_channel_ids']
+        channels_by_id = {c['id']: c for c in self.config.get_youtube_channels()}
+
+        if not enabled:
+            await update.message.reply_text(
+                "👥 <b>Group Filter Status</b>\n\n"
+                "Mode: <b>ALL CHANNELS ALLOWED</b>\n"
+                "Use /enable_group_filter_notify to restrict channels.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if not allowed_ids:
+            await update.message.reply_text(
+                "👥 <b>Group Filter Status</b>\n\n"
+                "Mode: <b>FILTER ENABLED</b>\n"
+                "Allowed channels: <code>0</code>\n\n"
+                "Use /allow_channel_notify &lt;channel_id&gt; to allow channels.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        allowed_lines = []
+        for channel_id in allowed_ids:
+            channel = channels_by_id.get(channel_id)
+            if channel:
+                allowed_lines.append(f"• <b>{channel['name']}</b> (<code>{channel_id}</code>)")
+            else:
+                allowed_lines.append(f"• <code>{channel_id}</code>")
+
+        await update.message.reply_text(
+            "👥 <b>Group Filter Status</b>\n\n"
+            "Mode: <b>FILTER ENABLED</b>\n"
+            f"Allowed channels: <code>{len(allowed_ids)}</code>\n\n"
+            + "\n".join(allowed_lines),
+            parse_mode=ParseMode.HTML
+        )
+
+    async def cmd_set_group_channels_notify(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Set multiple allowed YouTube channel IDs for the current chat.
+
+        Usage: /set_group_channels_notify id1,id2,... or space separated ids
+        """
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if not context.args:
+            await update.message.reply_text(
+                "❌ Usage: /set_group_channels_notify id1,id2,...\n\n"
+                "Example: /set_group_channels_notify UCR3aArAyYGXwJegyRGZ7WTg,UC-sXVjY3Lw1IGxsme-_4ixA",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        # Parse IDs from args (accept comma or space separated)
+        raw = " ".join(context.args)
+        parts = [p.strip() for p in raw.replace(',', ' ').split() if p.strip()]
+        if not parts:
+            await update.message.reply_text(
+                "❌ No valid channel IDs provided.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        monitored = {c['id']: c for c in self.config.get_youtube_channels()}
+        valid = []
+        invalid = []
+        for cid in parts:
+            if cid in monitored:
+                valid.append(cid)
+            else:
+                invalid.append(cid)
+
+        if not valid:
+            await update.message.reply_text(
+                "❌ None of the provided IDs match monitored channels.\n"
+                "Use /list_youtube_channels to see monitored IDs.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        # Set allowed list and enable the filter for the chat
+        ok = self.config.set_allowed_channels_for_chat(chat_id, valid)
+        if not ok:
+            await update.message.reply_text(
+                "❌ This chat is not in the notification list. Use /add_telegram_notify first.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        self.config.set_chat_channel_filter_enabled(chat_id, True)
+
+        allowed_names = [monitored[cid]['name'] for cid in valid]
+
+        reply = (
+            "✅ Group allowlist updated and enabled.\n\n"
+            f"Allowed channels: <code>{len(valid)}</code>\n"
+            + "\n".join([f"• <b>{n}</b> (<code>{i}</code>)" for n, i in zip(allowed_names, valid)])
+        )
+
+        if invalid:
+            reply += ("\n\n⚠️ The following IDs are not monitored and were ignored:\n" + "\n".join([f"• <code>{i}</code>" for i in invalid]))
+
+        await update.message.reply_text(reply, parse_mode=ParseMode.HTML)
     #----------------------------------------------------------------------------------#
 
     async def get_channel_id(self, channel_data):
@@ -919,11 +1220,6 @@ class YouTubeTelegramBot:
         title = video['snippet']['title']
         channel_id = video['snippet']['channelId']
         upload_date = datetime.fromisoformat(video['snippet']['publishedAt'].replace('Z', '+00:00'))
-        
-        chat_id = self.config.get_chat_id_for_video(video_id)  # Assuming a method to get the chat ID for the video
-        if self.is_duplicate_title(title, upload_date, chat_id):
-            print(f"Skipping duplicate title within the same day in chat {chat_id}: {title}")
-            return
             
         thumbnail_url = (
             video['snippet']['thumbnails'].get('maxres') or 
@@ -966,11 +1262,11 @@ class YouTubeTelegramBot:
 
         # Send with or without thumbnail based on settings
         if self.thumbnails_enabled:
-            await self.send_notifications(thumbnail_data, caption)
+            await self.send_notifications(thumbnail_data, caption, channel_id, title, upload_date)
         else:
-            await self.send_notifications_text_only(caption)
+            await self.send_notifications_text_only(caption, channel_id, title, upload_date)
 
-    async def send_notifications(self, thumbnail_data, caption):
+    async def send_notifications(self, thumbnail_data, caption, channel_id, title, upload_date):
         """Send notifications with thumbnails to all configured Telegram chats"""
         chat_ids = self.config.get_telegram_chats()
         total_chats = len(chat_ids)
@@ -986,6 +1282,11 @@ class YouTubeTelegramBot:
             batch = chat_ids[i:i + batch_size]
             for chat_id in batch:
                 try:
+                    if not self.config.is_channel_allowed_for_chat(chat_id, channel_id):
+                        continue
+                    if self.is_duplicate_title(title, upload_date, chat_id):
+                        print(f"Skipping duplicate title within the same day in chat {chat_id}: {title}")
+                        continue
                     await self.send_notification_to_chat_with_thumbnail(chat_id, thumbnail_data, caption)
                     success_chats.append(chat_id)
                 except Exception as e:
@@ -1005,7 +1306,7 @@ class YouTubeTelegramBot:
 
         print("====================================================\n")
 
-    async def send_notifications_text_only(self, caption):
+    async def send_notifications_text_only(self, caption, channel_id, title, upload_date):
         """Send text-only notifications to all configured Telegram chats"""
         chat_ids = self.config.get_telegram_chats()
         total_chats = len(chat_ids)
@@ -1021,6 +1322,11 @@ class YouTubeTelegramBot:
             batch = chat_ids[i:i + batch_size]
             for chat_id in batch:
                 try:
+                    if not self.config.is_channel_allowed_for_chat(chat_id, channel_id):
+                        continue
+                    if self.is_duplicate_title(title, upload_date, chat_id):
+                        print(f"Skipping duplicate title within the same day in chat {chat_id}: {title}")
+                        continue
                     await self.send_notification_to_chat_text_only(chat_id, caption)
                     success_chats.append(chat_id)
                 except Exception as e:
@@ -1255,6 +1561,12 @@ class YouTubeTelegramBot:
         application.add_handler(CommandHandler('add_youtube_channel_with_group', self.cmd_add_youtube_channel_with_group))
         application.add_handler(CommandHandler('remove_youtube_channel', self.cmd_remove_youtube_channel))
         application.add_handler(CommandHandler('list_youtube_channels', self.cmd_list_youtube_channels))
+        application.add_handler(CommandHandler('enable_group_filter_notify', self.cmd_enable_group_filter))
+        application.add_handler(CommandHandler('disable_group_filter_notify', self.cmd_disable_group_filter))
+        application.add_handler(CommandHandler('allow_channel_notify', self.cmd_allow_channel_notify))
+        application.add_handler(CommandHandler('disallow_channel_notify', self.cmd_disallow_channel_notify))
+        application.add_handler(CommandHandler('list_group_filter_notify', self.cmd_list_group_filter_notify))
+        application.add_handler(CommandHandler('set_group_channels_notify', self.cmd_set_group_channels_notify))
         
         application.add_error_handler(self.error_handler)
 

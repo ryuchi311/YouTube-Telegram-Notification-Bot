@@ -107,6 +107,11 @@ A `Dockerfile`, `docker-compose.yml`, and `docker-manage.sh` are included for co
 - `/add_youtube_channel_with_group <name> <id> <tg_link>` — add channel with Telegram link
 - `/remove_youtube_channel <id>` — remove a channel
 - `/list_youtube_channels` — show monitored channels
+- `/enable_group_filter_notify` — enable per-group channel allowlist mode
+- `/disable_group_filter_notify` — disable per-group filter (allow all)
+- `/allow_channel_notify <channel_id>` — allow one monitored channel in current group
+- `/disallow_channel_notify <channel_id>` — remove one allowed channel in current group
+- `/list_group_filter_notify` — show current group filter status and allowlist
 
 ## Notification preview
 
