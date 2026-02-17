@@ -27,7 +27,16 @@ load_dotenv()
 
 class YouTubeTelegramBot:
     def __init__(self):
-        self.youtube = build('youtube', 'v3', developerKey=os.getenv('YOUTUBE_API_KEY'))
+        yt_key = os.getenv('YOUTUBE_API_KEY')
+        if not yt_key:
+            print("Warning: YOUTUBE_API_KEY not set. YouTube checks will be disabled.")
+            self.youtube = None
+        else:
+            try:
+                self.youtube = build('youtube', 'v3', developerKey=yt_key)
+            except Exception as e:
+                print(f"Warning: Failed to initialize YouTube client: {e}\nYouTube checks will be disabled.")
+                self.youtube = None
         self.bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
         self.bot = Bot(token=self.bot_token)
         self.admin_users = [int(uid) for uid in str(os.getenv('ADMIN_USERS', '')).split(',') if uid]
@@ -1146,6 +1155,13 @@ class YouTubeTelegramBot:
             if channel_id in self.channel_cache:
                 return self.channel_cache[channel_id]
 
+            # If YouTube client isn't configured, skip verification
+            if not self.youtube:
+                # Accept the provided ID but do not verify with API
+                self.channel_cache[channel_id] = channel_id
+                print(f"YouTube client disabled — accepting channel without verification: {channel_name} ({channel_id})")
+                return channel_id
+
             # Verify the channel ID exists
             response = self.youtube.channels().list(
                 part="id,snippet",
@@ -1156,7 +1172,7 @@ class YouTubeTelegramBot:
                 self.channel_cache[channel_id] = channel_id
                 print(f"Successfully verified channel: {channel_name} ({channel_id})")
                 return channel_id
-            
+
             print(f"Could not verify channel ID {channel_id} for {channel_name}")
             return None
 
@@ -1167,6 +1183,11 @@ class YouTubeTelegramBot:
     async def check_channel(self, session, channel_data):
         """Check a YouTube channel for new uploads"""
         try:
+            # If YouTube client is disabled, skip checking channels
+            if not self.youtube:
+                print(f"Skipping channel checks because YouTube client is not configured.")
+                return
+
             channel_id = await self.get_channel_id(channel_data)
             if not channel_id:
                 print(f"Skipping channel {channel_data['name']} - could not verify ID {channel_data['id']}")
@@ -1604,9 +1625,23 @@ class YouTubeTelegramBot:
         print(f"\nReceived signal {sig}")
         self.shutdown_event.set()
         monitor_task.cancel()
-        await application.stop()
-        await application.shutdown()
-        sys.exit(0)
+        try:
+            await application.stop()
+        except Exception as e:
+            print(f"Warning while stopping application: {e}")
+
+        try:
+            await application.shutdown()
+        except RuntimeError as e:
+            # This can happen if the Updater is still running; log and continue shutdown
+            print(f"RuntimeError during application.shutdown(): {e} — continuing shutdown.")
+        except Exception as e:
+            print(f"Warning during application.shutdown(): {e}")
+
+        try:
+            sys.exit(0)
+        except SystemExit:
+            raise
 
 async def main():
     bot = YouTubeTelegramBot()

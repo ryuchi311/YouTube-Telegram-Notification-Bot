@@ -1,80 +1,107 @@
 [
-{
-    "id": -1001732030189,
-    "title": "B.Y.A.G. | Bullish Yield Association of Gamers",
-    "type": "supergroup",
-    "added_at": "2025-01-10 23:45:09"
-  },
-  {
-    "id": -1002369886690,
-    "title": "Mapaglaro (HideOut)",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:36:17"
-  },
-  {
-    "id": -1001860714572,
-    "title": "Margarine Guild Philippines",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:36:33"
-  },
-  {
-    "id": -1001628495098,
-    "title": "ARATSBoi Gaming Tambayan",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:39:09"
-  },
-  {
-    "id": -1002198174574,
-    "title": "\ud83d\ude80 CDPH COMMUNITY \ud83c\uddf5\ud83c\udded",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:39:12"
-  },
-  {
-    "id": -1001508478674,
-    "title": "CGN Web3 Gaming",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:39:16"
-  },
-  {
-    "id": -1002364213852,
-    "title": "KIMMUNITY (Airdrop, Crypto, & Web3) \ud83c\udf37",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:39:23"
-  },
-  {
-    "id": -1001950729810,
-    "title": "ULTM8X Digizens",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:39:32"
-  },
   {
     "id": -1001708240849,
     "title": "Brgy Tamago",
     "type": "supergroup",
-    "added_at": "2025-10-01 22:39:57"
-  },
-  {
-    "id": -1001768354302,
-    "title": "DONGS TV TAMBAYAN",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:41:28"
-  },
-  {
-    "id": -1002090263222,
-    "title": "HOG Main Chat | Bardagulan \u2694\ufe0f",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:42:09"
-  },
-  {
-    "id": -1001314022629,
-    "title": "\ud83d\ude80ALROCK NATION",
-    "type": "supergroup",
-    "added_at": "2025-10-01 22:43:56"
+    "added_at": "2025-10-01 22:39:57",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
   },
   {
     "id": -1003572242217,
     "title": "ULTM8X Digizens",
     "type": "supergroup",
-    "added_at": "2026-01-08 18:31:54"
+    "added_at": "2026-01-08 18:31:54",
+    "channel_filter_enabled": true,
+    "allowed_channel_ids": [
+      "UCR3aArAyYGXwJegyRGZ7WTg",
+      "UC-sXVjY3Lw1IGxsme-_4ixA",
+      "UCG0y34BqW7ERseyMEsIJaOA",
+      "UC7jm4PVZdNYKsX-3ORdz7IQ",
+      "UCokp3z-k5GuuySZm2VgWFGQ",
+      "UCMkmM864V3salLOR-ZtCK-Q",
+      "UC1uD0TJEk_K7kF9BnlK3H7g",
+      "UCU5n-pAZvHo2VHdkuUD3eLQ"
+    ]
+  },
+  {
+    "id": -1001732030189,
+    "title": "B.Y.A.G. | Bullish Yield Association of Gamers",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:36:37",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1001860714572,
+    "title": "Margarine Guild Philippines",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:37:14",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1001314022629,
+    "title": "\ud83d\ude80ALROCK NATION",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:38:25",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1001508478674,
+    "title": "CGN Web3 Gaming",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:38:38",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1001768354302,
+    "title": "DONGS TV TAMBAYAN",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:39:03",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1002198174574,
+    "title": "\ud83d\ude80 CDPH COMMUNITY \ud83c\uddf5\ud83c\udded",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:39:08",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1001628495098,
+    "title": "ARATSBoi Gaming Tambayan",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:39:27",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1002364213852,
+    "title": "KIMMUNITY (Airdrop, Crypto, & Web3) \ud83c\udf37",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:39:42",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1002369886690,
+    "title": "Mapaglaro (HideOut)",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:39:50",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
+  },
+  {
+    "id": -1002090263222,
+    "title": "HOG Main Chat | Bardagulan \u2694\ufe0f",
+    "type": "supergroup",
+    "added_at": "2026-02-16 12:40:29",
+    "channel_filter_enabled": false,
+    "allowed_channel_ids": []
   }
 ]
