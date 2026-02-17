@@ -91,22 +91,56 @@ A `Dockerfile`, `docker-compose.yml`, and `docker-manage.sh` are included for co
 
 ## Quick command reference
 
-- `/start_notify` — ping bot and show welcome
-- `/help_notify` — show help and available commands
-- `/how_notify` — beginner setup steps
-- `/add_telegram_notify` — add current chat to notifications (bot must be admin)
-- `/remove_notify` — remove current chat from notifications
-- `/list_notify` — list chats receiving notifications
-- `/pause_notify` — pause notifications
-- `/unpause_notify` — resume notifications
-- `/status_notify` — show bot status and stats
-- `/enable_thumbnails` — enable thumbnails in notifications
-- `/disable_thumbnails` — send text-only notifications
-- `/set_link_preview` — configure link preview options (saved in settings.json)
-- `/add_youtube_channel <name> <id>` — add channel (no tg link)
-- `/add_youtube_channel_with_group <name> <id> <tg_link>` — add channel with Telegram link
-- `/remove_youtube_channel <id>` — remove a channel
-- `/list_youtube_channels` — show monitored channels
+**Quick Command Reference** — run these from an admin account in Telegram.
+
+- **General:**
+	- `/start_notify` — show welcome message and quick tips
+	- `/help_notify` — full help and usage
+	- `/how_notify` — beginner setup guide
+
+- **Chat / Bot Management:**
+	- `/add_telegram_notify` — add current chat to notifications (bot must be admin)
+	- `/remove_notify` — remove current chat from notifications
+	- `/list_notify` — list chats currently receiving notifications
+	- `/pause_notify` — pause all notifications
+	- `/unpause_notify` — resume notifications
+	- `/status_notify` — show bot status and stats
+
+- **Thumbnail / Preview:**
+	- `/enable_thumbnails` — include video thumbnails in messages
+	- `/disable_thumbnails` — send text-only notifications
+	- `/set_link_preview <option> <true|false>` — fine tune link preview settings
+
+- **YouTube Channel Management:**
+	- `/add_youtube_channel <name> <id>` — add a YouTube channel to monitor
+	- `/add_youtube_channel_with_group <name> <id> <tg_link>` — add channel and its TG group link
+	- `/remove_youtube_channel <id>` — remove a channel
+	- `/list_youtube_channels` — show monitored channels and TG links
+
+- **Per-Group Channel Filters (NEW):**
+	- `/enable_group_filter_notify` — enable allowlist mode for this group (only allowed channels will post)
+	- `/disable_group_filter_notify` — disable group filter (allow all monitored channels)
+	- `/allow_channel_notify <channel_id>` — allow one monitored channel for this group
+	- `/disallow_channel_notify <channel_id>` — remove a channel from this group's allowlist
+	- `/list_group_filter_notify` — show this group's filter status and allowed channels
+	- `/set_group_channels_notify id1,id2,...` — bulk set allowed channels and enable the filter
+
+- **Forum Topic (thread) Posting (NEW):**
+	- `/set_group_topic_notify <message_thread_id>` — send future notifications into this forum topic (requires group topics enabled)
+	- `/clear_group_topic_notify` — clear the configured topic and post to main chat
+
+Examples:
+```
+# Allow two channels in current group and enable filter
+/set_group_channels_notify UCR3aArAyYGXwJegyRGZ7WTg,UC-sXVjY3Lw1IGxsme-_4ixA
+
+# Post notifications into forum topic id 12345
+/set_group_topic_notify 12345
+```
+
+Notes:
+- Commands that modify chat settings require you to be listed in `ADMIN_USERS` in the bot `.env` (global admin). You can also edit `Pydata/telegram_chats.json` directly if needed.
+- `channel_filter_enabled: false` means the group receives notifications from all monitored channels. Set it to `true` and populate `allowed_channel_ids` to restrict.
 - `/enable_group_filter_notify` — enable per-group channel allowlist mode
 - `/disable_group_filter_notify` — disable per-group filter (allow all)
 - `/allow_channel_notify <channel_id>` — allow one monitored channel in current group

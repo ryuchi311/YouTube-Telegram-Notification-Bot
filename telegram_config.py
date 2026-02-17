@@ -203,7 +203,8 @@ class TelegramConfig:
             'type': chat_type or 'unknown',
             'added_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'channel_filter_enabled': False,
-            'allowed_channel_ids': []
+            'allowed_channel_ids': [],
+            'message_thread_id': None
         }
         
         self.chats.append(chat_data)
@@ -343,6 +344,34 @@ class TelegramConfig:
 
         self.save_chats(self.chats)
         return True
+
+    def set_chat_topic(self, chat_id: int, message_thread_id: int) -> bool:
+        """Set the message_thread_id (forum topic) for the chat."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return False
+        try:
+            chat['message_thread_id'] = int(message_thread_id)
+        except Exception:
+            return False
+        self.save_chats(self.chats)
+        return True
+
+    def clear_chat_topic(self, chat_id: int) -> bool:
+        """Clear the message_thread_id for the chat."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return False
+        chat['message_thread_id'] = None
+        self.save_chats(self.chats)
+        return True
+
+    def get_chat_topic(self, chat_id: int):
+        """Return the message_thread_id for the chat or None."""
+        chat = self.get_chat(chat_id)
+        if not chat:
+            return None
+        return chat.get('message_thread_id')
 
     #-------------------------------------------------------------------------#
     def add_youtube_channel(self, channel_name: str, channel_id: str, tg_group: str = None) -> bool:

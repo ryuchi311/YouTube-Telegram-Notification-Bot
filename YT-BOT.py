@@ -345,6 +345,69 @@ class YouTubeTelegramBot:
                 parse_mode=ParseMode.HTML
             )
 
+    async def cmd_set_group_topic(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Set the forum topic (message_thread_id) for the current chat."""
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if not context.args:
+            await update.message.reply_text(
+                "❌ Usage: /set_group_topic_notify <message_thread_id>\n\n"
+                "You can get the topic id from Telegram (forum topic message_thread_id).",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        try:
+            thread_id = int(context.args[0])
+        except Exception:
+            await update.message.reply_text(
+                "❌ Invalid thread ID. It must be an integer.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if self.config.set_chat_topic(chat_id, thread_id):
+            await update.message.reply_text(
+                f"✅ Topic set for this group: <code>{thread_id}</code>",
+                parse_mode=ParseMode.HTML
+            )
+        else:
+            await update.message.reply_text(
+                "❌ This chat is not configured for notifications. Use /add_telegram_notify first.",
+                parse_mode=ParseMode.HTML
+            )
+
+    async def cmd_clear_group_topic(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Clear the forum topic for the current chat."""
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+
+        if not self.is_admin(user_id):
+            await update.message.reply_text(
+                "⛔️ Sorry, only admin users can use this command.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
+        if self.config.clear_chat_topic(chat_id):
+            await update.message.reply_text(
+                "✅ Topic cleared for this group. Notifications will be posted in the main chat.",
+                parse_mode=ParseMode.HTML
+            )
+        else:
+            await update.message.reply_text(
+                "❌ This chat is not configured for notifications. Use /add_telegram_notify first.",
+                parse_mode=ParseMode.HTML
+            )
+
     async def cmd_pause(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /pause_notify command"""
         user_id = update.effective_user.id
@@ -1378,12 +1441,22 @@ class YouTubeTelegramBot:
                 prefer_large_media=preview_opts.get('prefer_large_media', False),
                 show_above_text=preview_opts.get('show_above_text', False)
             )
-            
+            # include optional message_thread_id if set for the chat
+            message_thread_id = None
+            chat = None
+            try:
+                chat = self.config.get_chat(chat_id)
+                if chat:
+                    message_thread_id = chat.get('message_thread_id')
+            except Exception:
+                pass
+
             await self.bot.send_message(
                 chat_id=chat_id,
                 text=caption,
                 parse_mode=ParseMode.HTML,
                 link_preview_options=link_preview,
+                message_thread_id=message_thread_id,
                 read_timeout=30,
                 write_timeout=30,
                 connect_timeout=30,
@@ -1433,11 +1506,22 @@ class YouTubeTelegramBot:
     async def send_notification_to_chat_with_thumbnail(self, chat_id, thumbnail_data, caption):
         """Send notification with thumbnail to a single chat"""
         try:
+            # include optional message_thread_id if set for the chat
+            message_thread_id = None
+            chat = None
+            try:
+                chat = self.config.get_chat(chat_id)
+                if chat:
+                    message_thread_id = chat.get('message_thread_id')
+            except Exception:
+                pass
+
             await self.bot.send_photo(
                 chat_id=chat_id,
                 photo=BytesIO(thumbnail_data),
                 caption=caption,
                 parse_mode=ParseMode.HTML,
+                message_thread_id=message_thread_id,
                 read_timeout=30,
                 write_timeout=30,
                 connect_timeout=30,
@@ -1588,6 +1672,8 @@ class YouTubeTelegramBot:
         application.add_handler(CommandHandler('disallow_channel_notify', self.cmd_disallow_channel_notify))
         application.add_handler(CommandHandler('list_group_filter_notify', self.cmd_list_group_filter_notify))
         application.add_handler(CommandHandler('set_group_channels_notify', self.cmd_set_group_channels_notify))
+        application.add_handler(CommandHandler('set_group_topic_notify', self.cmd_set_group_topic))
+        application.add_handler(CommandHandler('clear_group_topic_notify', self.cmd_clear_group_topic))
         
         application.add_error_handler(self.error_handler)
 
